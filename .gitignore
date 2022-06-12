@@ -1,0 +1,10 @@
+data
+great_expectations
+model
+__pycache__
+.ipynb_checkpoints
+*.ipynb
+.env
+*_cache
+venv
+outputs
