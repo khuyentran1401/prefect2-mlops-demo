@@ -7,3 +7,4 @@ prefect==2.0b6
 scikit_learn==1.1.1
 SQLAlchemy==1.4.37
 xgboost==1.6.1
+psycopg2==2.9.3

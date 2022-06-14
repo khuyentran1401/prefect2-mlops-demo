@@ -1,5 +1,3 @@
-import pickle
-
 import hydra
 import pandas as pd
 from hydra.utils import to_absolute_path as abspath
@@ -68,13 +66,26 @@ def split_X_y(data: pd.DataFrame):
     return X, y
 
 
+def train_validation_split(X_train: pd.DataFrame, y_train: pd.DataFrame):
+    return train_test_split(X_train, y_train, test_size=0.2, random_state=0)
+
+
 @task
 def split_data(data: pd.DataFrame):
     train = data.dropna(subset=["AdoptionSpeed"])
     test = data[data["AdoptionSpeed"].isna()]
     X_train, y_train = split_X_y(train)
     X_test, _ = split_X_y(test)
-    return {"X_train": X_train, "X_test": X_test, "y_train": y_train}
+    X_train, X_valid, y_train, y_valid = train_validation_split(
+        X_train, y_train
+    )
+    return {
+        "X_train": X_train,
+        "X_test": X_test,
+        "X_valid": X_valid,
+        "y_train": y_train,
+        "y_valid": y_valid,
+    }
 
 
 @task

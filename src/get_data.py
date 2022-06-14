@@ -16,11 +16,6 @@ def read_data(connection, database: str):
 
 
 @task
-def merge_data(df1, df2):
-    return pd.concat([df1, df2])
-
-
-@task
 def save_data(df: pd.DataFrame, save_path: str):
     df.to_csv(abspath(save_path))
 
