@@ -1,6 +1,15 @@
-defaults:
-  - data: data
-  - _self_
+data:
+  raw:
+    name: pet
+    path: data/raw/pet.csv
+  processed: data/processed/
+  final: data/final/prediction.csv
+
+connection:
+  user: postgres
+  password: 123456
+  host: localhost:5432
+  database: pet_finder
 
 n_estimators: 20
 use_cols:
@@ -8,7 +17,7 @@ use_cols:
   - Age
   - Breed1
   - Breed2
-  - Gender 
+  - Gender
   - Color1
   - Color2
   - Color3
@@ -38,3 +47,15 @@ cat_cols:
   - Dewormed
   - Sterilized
   - Health
+
+n_splits: 5
+params:
+  objective: multiclass
+  max_depth: 4
+  alpha: 10
+  learning_rate: 1.0
+  n_estimators: 10
+  random_state: 0
+
+model:
+  save_path: model/xgboost

@@ -29,9 +29,7 @@ def save_prediction(predictions: np.ndarray, save_path: str):
     predictions.to_csv(abspath(save_path), index=False)
 
 
-@hydra.main(
-    config_path="../config", config_name="train_model", version_base=None
-)
+@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
 def predict(config):
     test = load_test(config.data.processed)

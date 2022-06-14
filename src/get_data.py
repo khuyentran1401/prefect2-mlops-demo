@@ -20,7 +20,7 @@ def save_data(df: pd.DataFrame, save_path: str):
     df.to_csv(abspath(save_path))
 
 
-@hydra.main(config_path="../config", config_name="get_data", version_base=None)
+@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
 def get_data(config):
     df = read_data(config.connection, config.data.raw.name)

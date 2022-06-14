@@ -96,7 +96,7 @@ def save_data(data: dict, save_dir: str):
         value.to_csv(save_path, index=False)
 
 
-@hydra.main(config_path="../config", config_name="process", version_base=None)
+@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
 def process_data(config):
     data = get_data(config.data.raw.path)
