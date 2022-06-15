@@ -1,6 +1,6 @@
-data
+data/*/*
 great_expectations
-model
+model/*
 __pycache__
 .ipynb_checkpoints
 *.ipynb
