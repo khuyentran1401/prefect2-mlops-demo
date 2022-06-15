@@ -1,9 +1,13 @@
+from datetime import timedelta
+from time import sleep
+
 import joblib
 import mlflow
 import pandas as pd
 from mlflow import log_metric, log_params
 from omegaconf import DictConfig
 from prefect import flow, task
+from prefect.tasks import task_input_hash
 from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
 
@@ -17,14 +21,14 @@ def setup_mlflow():
     mlflow.set_experiment("pet-model")
 
 
-@task
+@task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
 def load_data(save_dir: str):
     data = {}
     names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
         save_path = save_dir + name + ".csv"
         data[name] = pd.read_csv(save_path)
-
+    sleep(4)
     return data
 
 
