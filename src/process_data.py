@@ -1,8 +1,8 @@
-import hydra
 import pandas as pd
-from hydra.utils import to_absolute_path as abspath
 from prefect import flow, task
 from sklearn.model_selection import train_test_split
+
+from helper import load_config
 
 pd.options.mode.chained_assignment = None
 # ---------------------------------------------------------------------------- #
@@ -12,7 +12,7 @@ pd.options.mode.chained_assignment = None
 
 @task
 def get_data(data_path: str):
-    return pd.read_csv(abspath(data_path))
+    return pd.read_csv(data_path)
 
 
 def fill_na_description(data: pd.DataFrame):
@@ -92,13 +92,13 @@ def split_data(data: pd.DataFrame):
 def save_data(data: dict, save_dir: str):
 
     for name, value in data.items():
-        save_path = abspath(save_dir + name + ".csv")
+        save_path = save_dir + name + ".csv"
         value.to_csv(save_path, index=False)
 
 
-@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
-def process_data(config):
+def process_data():
+    config = load_config().result()
     data = get_data(config.data.raw.path)
     processed = get_description_features(data)
     filtered = filter_cols(config.use_cols, processed)

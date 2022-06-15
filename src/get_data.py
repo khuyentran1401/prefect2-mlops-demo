@@ -1,8 +1,8 @@
-import hydra
 import pandas as pd
-from hydra.utils import to_absolute_path as abspath
 from prefect import flow, task
 from sqlalchemy import create_engine
+
+from helper import load_config
 
 
 @task(retries=3)
@@ -17,12 +17,12 @@ def read_data(connection, database: str):
 
 @task
 def save_data(df: pd.DataFrame, save_path: str):
-    df.to_csv(abspath(save_path))
+    df.to_csv(save_path)
 
 
-@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
-def get_data(config):
+def get_data():
+    config = load_config().result()
     df = read_data(config.connection, config.data.raw.name)
     save_data(df, config.data.raw.path)
 

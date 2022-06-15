@@ -1,21 +1,21 @@
-import hydra
 import joblib
 import numpy as np
 import pandas as pd
-from hydra.utils import to_absolute_path as abspath
 from prefect import flow, task
 from xgboost import XGBClassifier
+
+from helper import load_config
 
 
 @task
 def load_test(save_dir: str):
-    save_path = abspath(save_dir + "X_test.csv")
+    save_path = save_dir + "X_test.csv"
     return pd.read_csv(save_path)
 
 
 @task
 def load_model(save_path: str):
-    return joblib.load(abspath(save_path))
+    return joblib.load(save_path)
 
 
 @task
@@ -26,12 +26,12 @@ def get_prediction(data: pd.DataFrame, model: XGBClassifier):
 @task
 def save_prediction(predictions: np.ndarray, save_path: str):
     predictions = pd.Series(predictions)
-    predictions.to_csv(abspath(save_path), index=False)
+    predictions.to_csv(save_path, index=False)
 
 
-@hydra.main(config_path="../config", config_name="main", version_base=None)
 @flow
-def predict(config):
+def predict():
+    config = load_config().result()
     test = load_test(config.data.processed)
     model = load_model(config.model.save_path)
     prediction = get_prediction(test, model)

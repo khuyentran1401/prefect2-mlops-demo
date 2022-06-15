@@ -1,13 +1,13 @@
-import hydra
 import joblib
 import mlflow
 import pandas as pd
-from hydra.utils import to_absolute_path as abspath
 from mlflow import log_metric, log_params
 from omegaconf import DictConfig
 from prefect import flow, task
 from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
+
+from helper import load_config
 
 
 @task
@@ -22,7 +22,7 @@ def load_data(save_dir: str):
     data = {}
     names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
-        save_path = abspath(save_dir + name + ".csv")
+        save_path = save_dir + name + ".csv"
         data[name] = pd.read_csv(save_path)
 
     return data
@@ -48,7 +48,7 @@ def evaluate_model(y_valid: pd.DataFrame, prediction: pd.DataFrame):
 
 @task
 def save_model(save_path: str, model: XGBClassifier):
-    joblib.dump(model, abspath(save_path))
+    joblib.dump(model, save_path)
 
 
 @task
@@ -57,11 +57,9 @@ def log_w_mlflow(score: int, params: DictConfig, model: XGBClassifier):
     log_params(dict(params))
 
 
-@hydra.main(
-    config_path="../config", config_name="train_model", version_base=None
-)
 @flow
-def train(config):
+def train():
+    config = load_config().result()
     setup_mlflow()
     data = load_data(config.data.processed).result()
     clf = train_model(config.params, data["X_train"], data["y_train"])
