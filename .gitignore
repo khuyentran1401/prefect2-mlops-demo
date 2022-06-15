@@ -1,6 +1,5 @@
-data/*/*
-great_expectations
 model/*
+data/*/*
 __pycache__
 .ipynb_checkpoints
 *.ipynb
@@ -9,3 +8,6 @@ __pycache__
 venv
 outputs
 mlruns
+
+!model/.gitkeep 
+!data/*/.gitkeep
