@@ -4,7 +4,6 @@ from time import sleep
 import joblib
 import mlflow
 import pandas as pd
-from mlflow import log_metric, log_params
 from omegaconf import DictConfig
 from prefect import flow, task
 from prefect.tasks import task_input_hash
@@ -14,63 +13,49 @@ from xgboost import XGBClassifier
 from helper import load_config
 
 
-@task
-def setup_mlflow():
-
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    mlflow.set_experiment("pet-model")
-
-
 @task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
-def load_data(save_dir: str):
+def load_data(config: DictConfig):
     data = {}
     names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
-        save_path = save_dir + name + ".csv"
+        save_path = config.data.processed + name + ".csv"
         data[name] = pd.read_csv(save_path)
     sleep(4)
     return data
 
 
 @task
-def train_model(params: DictConfig, X_train: pd.DataFrame, y_train: pd.Series):
-    params = dict(params)
+def train_model(config: DictConfig, data: dict):
+    params = dict(config.params)
     clf = XGBClassifier(**params)
-    clf.fit(X_train, y_train)
+    clf.fit(data["X_train"], data["y_train"])
     return clf
 
 
 @task
-def get_prediction(data: pd.DataFrame, model: XGBClassifier):
-    return model.predict(data)
+def get_prediction(data: dict, model: XGBClassifier):
+    return model.predict(data["X_valid"])
 
 
 @task
-def evaluate_model(y_valid: pd.DataFrame, prediction: pd.DataFrame):
-    return accuracy_score(y_valid, prediction)
+def evaluate_model(data: dict, prediction: pd.DataFrame):
+    score = accuracy_score(data["y_valid"], prediction)
+    print(f"The accuracy score is {score}")
 
 
 @task
-def save_model(save_path: str, model: XGBClassifier):
-    joblib.dump(model, save_path)
-
-
-@task
-def log_w_mlflow(score: int, params: DictConfig, model: XGBClassifier):
-    log_metric("accuracy_score", score)
-    log_params(dict(params))
+def save_model(config: DictConfig, model: XGBClassifier):
+    joblib.dump(model, config.model.save_path)
 
 
 @flow
 def train():
-    config = load_config().result()
-    setup_mlflow()
-    data = load_data(config.data.processed).result()
-    clf = train_model(config.params, data["X_train"], data["y_train"])
-    predictions = get_prediction(data["X_valid"], clf)
-    score = evaluate_model(data["y_valid"], predictions)
-    log_w_mlflow(score, config.params, clf)
-    save_model(config.model.save_path, clf)
+    config = load_config()
+    data = load_data(config)
+    clf = train_model(config, data)
+    predictions = get_prediction(data, clf)
+    evaluate_model(data, predictions)
+    save_model(config, clf)
 
 
 if __name__ == "__main__":

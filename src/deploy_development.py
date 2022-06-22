@@ -14,6 +14,7 @@ DeploymentSpec(
         anchor_date=pendulum.datetime(
             2022, 6, 15, 10, 29, 0, tz="America/Chicago"
         ),
+        timezone="America/Chicago",
     ),
     flow_runner=SubprocessFlowRunner(),
     tags=["dev"],

@@ -1,4 +1,5 @@
 import pandas as pd
+from omegaconf import DictConfig
 from prefect import flow, task
 from sklearn.model_selection import train_test_split
 
@@ -11,11 +12,11 @@ pd.options.mode.chained_assignment = None
 
 
 @task
-def get_data(data_path: str):
-    return pd.read_csv(data_path)
+def get_data(config: DictConfig):
+    return pd.read_csv(config.data.raw.path)
 
 
-def fill_na_description(data: pd.DataFrame):
+def fill_missing_description(data: pd.DataFrame):
     data["Description"] = data["Description"].fillna("")
     return data
 
@@ -38,7 +39,7 @@ def get_average_word_length(data: pd.DataFrame):
 @task
 def get_description_features(data: pd.DataFrame):
     return (
-        data.pipe(fill_na_description)
+        data.pipe(fill_missing_description)
         .pipe(get_desc_length)
         .pipe(get_desc_words)
         .pipe(get_average_word_length)
@@ -46,13 +47,13 @@ def get_description_features(data: pd.DataFrame):
 
 
 @task
-def filter_cols(use_cols: list, data: pd.DataFrame):
-    return data[use_cols]
+def filter_cols(config: DictConfig, data: pd.DataFrame):
+    return data[config.use_cols]
 
 
 @task
-def encode_cat_cols(cat_cols: list, data: pd.DataFrame):
-    cat_cols = list(cat_cols)
+def encode_cat_cols(config: DictConfig, data: pd.DataFrame):
+    cat_cols = list(config.cat_cols)
     data[cat_cols] = data[cat_cols].astype(str)
     for col in cat_cols:
         _, indexer = pd.factorize(data[col])
@@ -89,22 +90,22 @@ def split_data(data: pd.DataFrame):
 
 
 @task
-def save_data(data: dict, save_dir: str):
+def save_data(data: dict, config: DictConfig):
 
     for name, value in data.items():
-        save_path = save_dir + name + ".csv"
+        save_path = config.data.processed + name + ".csv"
         value.to_csv(save_path, index=False)
 
 
 @flow
 def process_data():
-    config = load_config().result()
-    data = get_data(config.data.raw.path)
+    config = load_config()
+    data = get_data(config)
     processed = get_description_features(data)
-    filtered = filter_cols(config.use_cols, processed)
-    encoded = encode_cat_cols(config.cat_cols, filtered)
+    filtered = filter_cols(config, processed)
+    encoded = encode_cat_cols(config, filtered)
     split = split_data(encoded)
-    save_data(split, config.data.processed)
+    save_data(split, config)
 
 
 # ---------------------------------------------------------------------------- #
