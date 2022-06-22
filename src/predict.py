@@ -1,6 +1,7 @@
 import joblib
 import numpy as np
 import pandas as pd
+from omegaconf import DictConfig
 from prefect import flow, task
 from xgboost import XGBClassifier
 
@@ -8,14 +9,14 @@ from helper import load_config
 
 
 @task
-def load_test(save_dir: str):
-    save_path = save_dir + "X_test.csv"
+def load_test(config: DictConfig):
+    save_path = config.data.processed + "X_test.csv"
     return pd.read_csv(save_path)
 
 
 @task
-def load_model(save_path: str):
-    return joblib.load(save_path)
+def load_model(config: DictConfig):
+    return joblib.load(config.model.save_path)
 
 
 @task
@@ -24,18 +25,18 @@ def get_prediction(data: pd.DataFrame, model: XGBClassifier):
 
 
 @task
-def save_prediction(predictions: np.ndarray, save_path: str):
+def save_prediction(predictions: np.ndarray, config: DictConfig):
     predictions = pd.Series(predictions)
-    predictions.to_csv(save_path, index=False)
+    predictions.to_csv(config.data.final, index=False)
 
 
 @flow
 def predict():
     config = load_config().result()
-    test = load_test(config.data.processed)
-    model = load_model(config.model.save_path)
+    test = load_test(config)
+    model = load_model(config)
     prediction = get_prediction(test, model)
-    save_prediction(prediction, config.data.final)
+    save_prediction(prediction, config)
 
 
 if __name__ == "__main__":
