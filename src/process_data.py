@@ -1,3 +1,5 @@
+from time import sleep
+
 import pandas as pd
 from omegaconf import DictConfig
 from prefect import flow, task
@@ -13,7 +15,7 @@ pd.options.mode.chained_assignment = None
 
 @task
 def get_data(config: DictConfig):
-    return pd.read_csv(config.data.raw.path)
+    return pd.read_csv(config.data.raw.path, index_col=0)
 
 
 def fill_missing_description(data: pd.DataFrame):
@@ -22,7 +24,7 @@ def fill_missing_description(data: pd.DataFrame):
 
 
 def get_desc_length(data: pd.DataFrame):
-    data["desc_length"] = data.apply(lambda x: len(x))
+    data["desc_length"] = data["Description"].str.len()
     return data
 
 
