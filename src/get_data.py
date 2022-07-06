@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from helper import load_config
 
 
-@task(retries=3, retry_delay_seconds=5)
+@task
 def read_data(config: DictConfig):
     connection = config.connection
     engine = create_engine(
