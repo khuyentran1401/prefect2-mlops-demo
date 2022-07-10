@@ -3,17 +3,12 @@ from omegaconf import DictConfig
 from prefect import flow, task
 from sklearn.model_selection import train_test_split
 
-from helper import load_config
+from helper import load_config, load_raw_data
 
 pd.options.mode.chained_assignment = None
 # ---------------------------------------------------------------------------- #
 #                                 Create tasks                                 #
 # ---------------------------------------------------------------------------- #
-
-
-@task
-def get_data(config: DictConfig):
-    return pd.read_csv(config.data.raw.path, index_col=0)
 
 
 def fill_missing_description(data: pd.DataFrame):
@@ -62,21 +57,21 @@ def encode_cat_cols(config: DictConfig, data: pd.DataFrame):
 
 
 @task
-def get_train_test(data: pd.DataFrame):
-    train = data.dropna(subset=["AdoptionSpeed"])
-    test = data[data["AdoptionSpeed"].isna()]
+def get_train_test(data: pd.DataFrame, config: DictConfig):
+    train = data.dropna(subset=[config.label])
+    test = data[data[config.label].isna()]
     return {"train": train, "test": test}
 
 
-def split_X_y_train(train: pd.DataFrame):
-    X_train = train.drop(columns=["AdoptionSpeed"])
-    y_train = train["AdoptionSpeed"]
+def split_X_y_train(train: pd.DataFrame, label: str):
+    X_train = train.drop(columns=[label])
+    y_train = train[label]
     return X_train, y_train
 
 
 @task
-def train_test_validation_split(data: dict):
-    X_train, y_train = split_X_y_train(data["train"])
+def train_test_validation_split(data: dict, config: DictConfig):
+    X_train, y_train = split_X_y_train(data["train"], config.label)
     X_train, X_valid, y_train, y_valid = train_test_split(
         X_train, y_train, test_size=0.2, random_state=0
     )
@@ -100,12 +95,12 @@ def save_data(data: dict, config: DictConfig):
 @flow
 def process_data():
     config = load_config()
-    data = get_data(config)
+    data = load_raw_data(config)
     processed = get_description_features(data)
     filtered = filter_cols(config, processed)
     encoded = encode_cat_cols(config, filtered)
-    train_test_data = get_train_test(encoded)
-    split = train_test_validation_split(train_test_data)
+    train_test_data = get_train_test(encoded, config)
+    split = train_test_validation_split(train_test_data, config)
     save_data(split, config)
 
 

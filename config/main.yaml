@@ -6,6 +6,7 @@ data:
   final: ../data/final/prediction.csv
 
 report: 
+  data_integrity: ../report/data_integrity.html
   full_suite: ../report/full_suite.html
 
 connection:
@@ -50,6 +51,7 @@ cat_cols:
   - Dewormed
   - Sterilized
   - Health
+label: AdoptionSpeed
 
 n_splits: 5
 params:

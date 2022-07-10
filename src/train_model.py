@@ -5,17 +5,7 @@ from prefect import flow, task
 from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
 
-from helper import load_config
-
-
-@task
-def load_data(config: DictConfig):
-    data = {}
-    names = ["X_train", "y_train", "X_valid", "y_valid"]
-    for name in names:
-        save_path = config.data.processed + name + ".csv"
-        data[name] = pd.read_csv(save_path)
-    return data
+from helper import load_config, load_train_test
 
 
 @task
@@ -45,7 +35,7 @@ def save_model(config: DictConfig, model: XGBClassifier):
 @flow
 def train():
     config = load_config()
-    data = load_data(config)
+    data = load_train_test(config)
     clf = train_model(config, data)
     predictions = get_prediction(data, clf)
     evaluate_model(data, predictions)

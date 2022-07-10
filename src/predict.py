@@ -5,18 +5,13 @@ from omegaconf import DictConfig
 from prefect import flow, task
 from xgboost import XGBClassifier
 
-from helper import load_config
+from helper import load_config, load_model
 
 
 @task
 def load_test(config: DictConfig):
     save_path = config.data.processed + "X_test.csv"
     return pd.read_csv(save_path)
-
-
-@task
-def load_model(config: DictConfig):
-    return joblib.load(config.model.save_path)
 
 
 @task

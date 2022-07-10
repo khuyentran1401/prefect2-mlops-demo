@@ -1,0 +1,3240 @@
+<!--
+    ~ ----------------------------------------------------------------------------
+    ~ Copyright (C) 2021-2022 Deepchecks (https://www.deepchecks.com)
+    ~
+    ~ This file is part of Deepchecks.
+    ~ Deepchecks is distributed under the terms of the GNU Affero General
+    ~ Public License (version 3 or later).
+    ~ You should have received a copy of the GNU Affero General Public License
+    ~ along with Deepchecks.  If not, see <http://www.gnu.org/licenses/>.
+    ~ ----------------------------------------------------------------------------
+    ~
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Integrity Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #212529;
+            text-align: left;
+            max-width: 1200px;
+            margin: auto;
+            background-color: white;
+        }
+
+        div.nbinput.container div.prompt *,
+        div.nboutput.container div.prompt *,
+        div.nbinput.container div.input_area pre,
+        div.nboutput.container div.output_area pre,
+        div.nbinput.container div.input_area .highlight,
+        div.nboutput.container div.output_area .highlight {
+            border: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: none;
+        }
+
+        div.nbinput.container > div[class*=highlight],
+        div.nboutput.container > div[class*=highlight] {
+            margin: 0;
+        }
+
+        div.nbinput.container div.prompt *,
+        div.nboutput.container div.prompt * {
+            background: none;
+        }
+
+        div.nboutput.container div.output_area .highlight,
+        div.nboutput.container div.output_area pre {
+            background: unset;
+        }
+
+        div.nboutput.container div.output_area div.highlight {
+            color: unset;  /* override Pygments text color */
+        }
+
+        /* avoid gaps between output lines */
+        div.nboutput.container div[class*=highlight] pre {
+            line-height: normal;
+        }
+
+        /* input/output containers */
+        div.nbinput.container,
+        div.nboutput.container {
+            display: -webkit-flex;
+            display: flex;
+            align-items: flex-start;
+            margin: 0;
+            width: 100%;
+        }
+        @media (max-width: 540px) {
+            div.nbinput.container,
+            div.nboutput.container {
+                flex-direction: column;
+            }
+        }
+
+        /* input container */
+        div.nbinput.container {
+            padding-top: 5px;
+        }
+
+        /* last container */
+        div.nblast.container {
+            padding-bottom: 5px;
+        }
+
+        /* input prompt */
+        div.nbinput.container div.prompt pre {
+            color: #307FC1;
+        }
+
+        /* output prompt */
+        div.nboutput.container div.prompt pre {
+            color: #BF5B3D;
+        }
+
+        /* all prompts */
+        div.nbinput.container div.prompt,
+        div.nboutput.container div.prompt {
+            width: 4.5ex;
+            padding-top: 5px;
+            position: relative;
+            user-select: none;
+        }
+
+        div.nbinput.container div.prompt > div,
+        div.nboutput.container div.prompt > div {
+            position: absolute;
+            right: 0;
+            margin-right: 0.3ex;
+        }
+
+        @media (max-width: 540px) {
+            div.nbinput.container div.prompt,
+            div.nboutput.container div.prompt {
+                width: unset;
+                text-align: left;
+                padding: 0.4em;
+            }
+            div.nboutput.container div.prompt.empty {
+                padding: 0;
+            }
+
+            div.nbinput.container div.prompt > div,
+            div.nboutput.container div.prompt > div {
+                position: unset;
+            }
+        }
+
+        /* disable scrollbars on prompts */
+        div.nbinput.container div.prompt pre,
+        div.nboutput.container div.prompt pre {
+            overflow: hidden;
+        }
+
+        /* input/output area */
+        div.nbinput.container div.input_area,
+        div.nboutput.container div.output_area {
+            -webkit-flex: 1;
+            flex: 1;
+            overflow: auto;
+        }
+        @media (max-width: 540px) {
+            div.nbinput.container div.input_area,
+            div.nboutput.container div.output_area {
+                width: 100%;
+            }
+        }
+
+        /* input area */
+        div.nbinput.container div.input_area {
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+            /*background: #f5f5f5;*/
+        }
+
+        /* override MathJax center alignment in output cells */
+        div.nboutput.container div[class*=MathJax] {
+            text-align: left !important;
+        }
+
+        /* override sphinx.ext.imgmath center alignment in output cells */
+        div.nboutput.container div.math p {
+            text-align: left;
+        }
+
+        /* standard error */
+        div.nboutput.container div.output_area.stderr {
+            background: #fdd;
+        }
+
+        /* ANSI colors */
+        .ansi-black-fg { color: #3E424D; }
+        .ansi-black-bg { background-color: #3E424D; }
+        .ansi-black-intense-fg { color: #282C36; }
+        .ansi-black-intense-bg { background-color: #282C36; }
+        .ansi-red-fg { color: #E75C58; }
+        .ansi-red-bg { background-color: #E75C58; }
+        .ansi-red-intense-fg { color: #B22B31; }
+        .ansi-red-intense-bg { background-color: #B22B31; }
+        .ansi-green-fg { color: #00A250; }
+        .ansi-green-bg { background-color: #00A250; }
+        .ansi-green-intense-fg { color: #007427; }
+        .ansi-green-intense-bg { background-color: #007427; }
+        .ansi-yellow-fg { color: #DDB62B; }
+        .ansi-yellow-bg { background-color: #DDB62B; }
+        .ansi-yellow-intense-fg { color: #B27D12; }
+        .ansi-yellow-intense-bg { background-color: #B27D12; }
+        .ansi-blue-fg { color: #208FFB; }
+        .ansi-blue-bg { background-color: #208FFB; }
+        .ansi-blue-intense-fg { color: #0065CA; }
+        .ansi-blue-intense-bg { background-color: #0065CA; }
+        .ansi-magenta-fg { color: #D160C4; }
+        .ansi-magenta-bg { background-color: #D160C4; }
+        .ansi-magenta-intense-fg { color: #A03196; }
+        .ansi-magenta-intense-bg { background-color: #A03196; }
+        .ansi-cyan-fg { color: #60C6C8; }
+        .ansi-cyan-bg { background-color: #60C6C8; }
+        .ansi-cyan-intense-fg { color: #258F8F; }
+        .ansi-cyan-intense-bg { background-color: #258F8F; }
+        .ansi-white-fg { color: #C5C1B4; }
+        .ansi-white-bg { background-color: #C5C1B4; }
+        .ansi-white-intense-fg { color: #A1A6B2; }
+        .ansi-white-intense-bg { background-color: #A1A6B2; }
+
+        .ansi-default-inverse-fg { color: #FFFFFF; }
+        .ansi-default-inverse-bg { background-color: #000000; }
+
+        .ansi-bold { font-weight: bold; }
+        .ansi-underline { text-decoration: underline; }
+
+
+        div.nbinput.container div.input_area div[class*=highlight] > pre,
+        div.nboutput.container div.output_area div[class*=highlight] > pre,
+        div.nboutput.container div.output_area div[class*=highlight].math,
+        div.nboutput.container div.output_area.rendered_html,
+        div.nboutput.container div.output_area > div.output_javascript,
+        div.nboutput.container div.output_area:not(.rendered_html) > img{
+            padding: 5px;
+            margin: 0;
+        }
+
+        /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+        div.nbinput.container div.input_area > div[class^='highlight'],
+        div.nboutput.container div.output_area > div[class^='highlight']{
+            overflow-y: hidden;
+        }
+
+        /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+        .prompt .copybtn {
+            display: none;
+        }
+
+        /* Some additional styling taken form the Jupyter notebook CSS */
+        div.rendered_html table {
+        border: none;
+        border-collapse: collapse;
+        border-spacing: 0;
+        color: black;
+        font-size: 12px;
+        table-layout: fixed;
+        }
+        div.rendered_html thead {
+        border-bottom: 1px solid black;
+        vertical-align: bottom;
+        }
+        div.rendered_html tr,
+        div.rendered_html th,
+        div.rendered_html td {
+        text-align: right;
+        vertical-align: middle;
+        padding: 0.5em 0.5em;
+        line-height: normal;
+        white-space: normal;
+        max-width: none;
+        border: none;
+        }
+        div.rendered_html th {
+        font-weight: bold;
+        }
+        div.rendered_html tbody tr:nth-child(odd) {
+        background: #f5f5f5;
+        }
+        div.rendered_html tbody tr:hover {
+        background: rgba(66, 165, 245, 0.2);
+        }
+    </style>
+    <script>
+        (!window.navigator.onLine ? alert('needs internet connection') : '');
+    </script>
+</head>
+<body>
+    
+
+<!-- Load require.js. Delete this if your page already loads require.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+<script type="application/vnd.jupyter.widget-state+json">
+{
+  "version_major": 2,
+  "version_minor": 0,
+  "state": {
+    "01e23cadd1cf44349c491dd718793cc3": {
+      "model_name": "AccordionModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "_titles": {
+          "0": "Data Integrity Suite"
+        },
+        "children": [
+          "IPY_MODEL_2529f6ac494a49ac85ff4bfb90143473"
+        ],
+        "layout": "IPY_MODEL_67b8f48592b54b988d10d4215bd639d2"
+      }
+    },
+    "2529f6ac494a49ac85ff4bfb90143473": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_bd527bc7be8f47088648b033f231e980",
+          "IPY_MODEL_b86209cc6deb4f5c8a91a571a59b2473",
+          "IPY_MODEL_06a45f20932a4d508b7e5afc2554b09d",
+          "IPY_MODEL_2617fa1cf0cd47e68d69d819b6977681",
+          "IPY_MODEL_e25ab3d5ae4f4127999ad369be5c1132"
+        ],
+        "layout": "IPY_MODEL_80c5453302ea4b8cabaa6481c4bf31f9"
+      }
+    },
+    "bd527bc7be8f47088648b033f231e980": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_c59ddf81e79c4487a0e3d00e408c2455",
+        "style": "IPY_MODEL_fd7d9b2b9249404080d926ade9ecb18a",
+        "value": "\n            <h1 id=\"summary_JBPM9DP35LRGVCF193EGYLEA1\">Data Integrity Suite</h1>\n            <p>\n                The suite is composed of various checks such as: String Length Out Of Bounds, Data Duplicates, Special Characters, etc...<br>\n                Each check may contain conditions (which will result in pass / fail / warning / error\n                , represented by \n<span style=\"color: green;display:inline-block\">\u2713</span> /\n<span style=\"color: red;display:inline-block\">\u2716</span> /\n<span style=\"color: orange;font-weight:bold;display:inline-block\">!</span> /\n<span style=\"color: firebrick;font-weight:bold;display:inline-block\">\u2048</span>\n) as well as other outputs such as plots or tables.<br>\n                Suites, checks and conditions can all be modified. Read more about\n                <a href=https://docs.deepchecks.com/en/stable/examples/guides/create_a_custom_suite.html?utm_source=display_output&utm_medium=referral&utm_campaign=suite_link target=\"_blank\">custom suites</a>.\n            </p>\n\n"
+      }
+    },
+    "c59ddf81e79c4487a0e3d00e408c2455": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "fd7d9b2b9249404080d926ade9ecb18a": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "b86209cc6deb4f5c8a91a571a59b2473": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_312232f370f64d3b8083c0a2b50987a5",
+          "IPY_MODEL_6e65a25f24b0413880a6482aded8b80b"
+        ],
+        "layout": "IPY_MODEL_1ff01e9489ec465083fdfc939c585851"
+      }
+    },
+    "312232f370f64d3b8083c0a2b50987a5": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_57cb3d50845a45049075debb581de121",
+        "style": "IPY_MODEL_edee9fc1c26f471a883a7f28df3a706b",
+        "value": "<span id=\"summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"></span>"
+      }
+    },
+    "57cb3d50845a45049075debb581de121": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "edee9fc1c26f471a883a7f28df3a706b": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "6e65a25f24b0413880a6482aded8b80b": {
+      "model_name": "AccordionModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "_titles": {
+          "0": "Didn't Pass"
+        },
+        "children": [
+          "IPY_MODEL_f5fc64655631478dbf4064014159eb8e"
+        ],
+        "layout": "IPY_MODEL_eb154db471394f4fbd5c98ef194e7e6a",
+        "selected_index": null
+      }
+    },
+    "f5fc64655631478dbf4064014159eb8e": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_a2d662350e75488fa2483b9114c0ec04",
+          "IPY_MODEL_944e3b6ced014f6496bf3dce8467bc91",
+          "IPY_MODEL_a6f400e5760144cebf895d04a994b10a",
+          "IPY_MODEL_d3adbe9c96d04d94b4b0c7ddfb6a9491",
+          "IPY_MODEL_6c095a1d131249a6ab8efe6ad91e6eda",
+          "IPY_MODEL_d3adbe9c96d04d94b4b0c7ddfb6a9491",
+          "IPY_MODEL_5c18071436a043dea22c47bc4b116804",
+          "IPY_MODEL_d3adbe9c96d04d94b4b0c7ddfb6a9491",
+          "IPY_MODEL_6e5ab823825a41d5a970261ed30ebdf8",
+          "IPY_MODEL_d3adbe9c96d04d94b4b0c7ddfb6a9491",
+          "IPY_MODEL_6ee823691039478fa0a185781aa67ead"
+        ],
+        "layout": "IPY_MODEL_6e455f05b5a34620979c9f9c8f2a0883"
+      }
+    },
+    "a2d662350e75488fa2483b9114c0ec04": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_c6207acf38dc464099f49acd3b573033",
+        "style": "IPY_MODEL_1a2451e1c844465891de84a3530599c3",
+        "value": "<style type=\"text/css\">\n#T_1f573 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_1f573 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_1f573 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_1f573 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_1f573 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_1f573\">\n  <thead>\n    <tr>\n      <th id=\"T_1f573_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_1f573_level0_col1\" class=\"col_heading level0 col1\" >Check</th>\n      <th id=\"T_1f573_level0_col2\" class=\"col_heading level0 col2\" >Condition</th>\n      <th id=\"T_1f573_level0_col3\" class=\"col_heading level0 col3\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_1f573_row0_col0\" class=\"data row0 col0\" ><div style=\"color: red;text-align: center\">\u2716</div></td>\n      <td id=\"T_1f573_row0_col1\" class=\"data row0 col1\" ><a href=\"#MixedNulls_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\">Mixed Nulls</a></td>\n      <td id=\"T_1f573_row0_col2\" class=\"data row0 col2\" >Number of different null types is less or equal to 1</td>\n      <td id=\"T_1f573_row0_col3\" class=\"data row0 col3\" >Found 2 out of 24 columns with amount of null types above threshold: ['Name', 'Description']</td>\n    </tr>\n    <tr>\n      <td id=\"T_1f573_row1_col0\" class=\"data row1 col0\" ><div style=\"color: red;text-align: center\">\u2716</div></td>\n      <td id=\"T_1f573_row1_col1\" class=\"data row1 col1\" ><a href=\"#ConflictingLabels_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\">Conflicting Labels</a></td>\n      <td id=\"T_1f573_row1_col2\" class=\"data row1 col2\" >Ambiguous sample ratio is less or equal to 0%</td>\n      <td id=\"T_1f573_row1_col3\" class=\"data row1 col3\" >Ratio of samples with conflicting labels: 20.94%</td>\n    </tr>\n    <tr>\n      <td id=\"T_1f573_row2_col0\" class=\"data row2 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_1f573_row2_col1\" class=\"data row2 col1\" ><a href=\"#SpecialCharacters_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\">Special Characters</a></td>\n      <td id=\"T_1f573_row2_col2\" class=\"data row2 col2\" >Ratio of samples containing solely special character is less or equal to 0.1%</td>\n      <td id=\"T_1f573_row2_col3\" class=\"data row2 col3\" >Found 1 out of 24 relevant columns with ratio above threshold: {'Description': '0.11%'}</td>\n    </tr>\n    <tr>\n      <td id=\"T_1f573_row3_col0\" class=\"data row3 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_1f573_row3_col1\" class=\"data row3 col1\" ><a href=\"#StringMismatch_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\">String Mismatch</a></td>\n      <td id=\"T_1f573_row3_col2\" class=\"data row3 col2\" >No string variants</td>\n      <td id=\"T_1f573_row3_col3\" class=\"data row3 col3\" >Found 2 out of 4 columns with amount of variants above threshold: {'Name': ['ben', 'blacky', 'angel', 'mickey', 'golden'], 'Description': ['friendly', 'lovelypuppylookingforaforeverhomeifuareintetestedtoadoptplscontactrachel', 'foradoption', 'hiifyouwishtoadoptmepleasecallcarolthankyou', 'pleasecont...</td>\n    </tr>\n    <tr>\n      <td id=\"T_1f573_row4_col0\" class=\"data row4 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_1f573_row4_col1\" class=\"data row4 col1\" ><a href=\"#StringLengthOutOfBounds_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\">String Length Out Of Bounds</a></td>\n      <td id=\"T_1f573_row4_col2\" class=\"data row4 col2\" >Ratio of string length outliers is less or equal to 0%</td>\n      <td id=\"T_1f573_row4_col3\" class=\"data row4 col3\" >Found 1 out of 4 relevant columns with outliers ratio above threshold: {'Description': '0.35%'}</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "c6207acf38dc464099f49acd3b573033": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1a2451e1c844465891de84a3530599c3": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "944e3b6ced014f6496bf3dce8467bc91": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_d998c237997b4c20b7a08ac35750a087",
+        "style": "IPY_MODEL_59637ec2a9d249d69d7f1911d598e6c3",
+        "value": "<hr style=\"background-color: #eee;border: 0 none;color: #eee;height: 4px;\">"
+      }
+    },
+    "d998c237997b4c20b7a08ac35750a087": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "59637ec2a9d249d69d7f1911d598e6c3": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "a6f400e5760144cebf895d04a994b10a": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_5dfdd9d8262046638ce8b174eeae4928",
+          "IPY_MODEL_ccb2bb6001804dac8b2690e9d7ae4ecd",
+          "IPY_MODEL_60a50822bc1545209f94e8ca6b6c3f38",
+          "IPY_MODEL_cf128790f141421e9263a41fd6172e0f"
+        ],
+        "layout": "IPY_MODEL_cb63aa530a6c4d7bbd2f76d834fe1bbb"
+      }
+    },
+    "5dfdd9d8262046638ce8b174eeae4928": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_eafe6f3f8ef943d09c84db5d90ba9958",
+        "style": "IPY_MODEL_1d40c6ba51634f29b10f25329a2900d4",
+        "value": "<h4 id=\"SpecialCharacters_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"><b>Special Characters</b></h4>"
+      }
+    },
+    "eafe6f3f8ef943d09c84db5d90ba9958": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1d40c6ba51634f29b10f25329a2900d4": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "ccb2bb6001804dac8b2690e9d7ae4ecd": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_811a6ec6e49b465c8edd426e30c0ce96",
+        "style": "IPY_MODEL_261a302d337447e884473cc997331b12",
+        "value": "<p>Search in column[s] for values that contains only special characters.</p>"
+      }
+    },
+    "811a6ec6e49b465c8edd426e30c0ce96": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "261a302d337447e884473cc997331b12": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "60a50822bc1545209f94e8ca6b6c3f38": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_4af0bcbd5b95444b832213a2a940075b",
+        "style": "IPY_MODEL_f2289003021b4ad9844f992d77e9b408",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_50123 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_50123 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_50123 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_50123 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_50123 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_50123\">\n  <thead>\n    <tr>\n      <th id=\"T_50123_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_50123_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_50123_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_50123_row0_col0\" class=\"data row0 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_50123_row0_col1\" class=\"data row0 col1\" >Ratio of samples containing solely special character is less or equal to 0.1%</td>\n      <td id=\"T_50123_row0_col2\" class=\"data row0 col2\" >Found 1 out of 24 relevant columns with ratio above threshold: {'Description': '0.11%'}</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "4af0bcbd5b95444b832213a2a940075b": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "f2289003021b4ad9844f992d77e9b408": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "cf128790f141421e9263a41fd6172e0f": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_1a535a0bff4f41058bcf2f0448a24c2f",
+          "IPY_MODEL_80bbb6ee1b1149f5bef3d197d5b3ab56",
+          "IPY_MODEL_dc54575350224f85b6f933393ba7158c",
+          "IPY_MODEL_d473258fc14b47fdb4068d71287c6f9d"
+        ],
+        "layout": "IPY_MODEL_1fc9568f8a8f4a18bfbe7b7670c1f197"
+      }
+    },
+    "1a535a0bff4f41058bcf2f0448a24c2f": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_892d9f6d02bf4bc1b3481110749aa75a",
+        "style": "IPY_MODEL_5dc88e763c014e15afc7f11df7cd3d6b",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "892d9f6d02bf4bc1b3481110749aa75a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5dc88e763c014e15afc7f11df7cd3d6b": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "80bbb6ee1b1149f5bef3d197d5b3ab56": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_1842b06bf49d4844bc99984adb7633d6",
+        "style": "IPY_MODEL_3a9fd2e4421d4540a28dc489a1e0f4f4",
+        "value": "<div>* showing only the top 10 columns, you can change it using n_top_columns param</div>"
+      }
+    },
+    "1842b06bf49d4844bc99984adb7633d6": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "3a9fd2e4421d4540a28dc489a1e0f4f4": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "dc54575350224f85b6f933393ba7158c": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_7ac8add78b8b4d0784cd7381f5ffc159",
+        "style": "IPY_MODEL_18eba5da29804a97813e65a1caabf463",
+        "value": "<style type=\"text/css\">\n#T_7f3ba table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_7f3ba thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_7f3ba tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_7f3ba th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_7f3ba td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_7f3ba\">\n  <thead>\n    <tr>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_7f3ba_level0_col0\" class=\"col_heading level0 col0\" >% Special-Only Samples</th>\n      <th id=\"T_7f3ba_level0_col1\" class=\"col_heading level0 col1\" >Most Common Special-Only Samples</th>\n    </tr>\n    <tr>\n      <th class=\"index_name level0\" >Column Name</th>\n      <th class=\"blank col0\" >&nbsp;</th>\n      <th class=\"blank col1\" >&nbsp;</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_7f3ba_level0_row0\" class=\"row_heading level0 row0\" >Name</th>\n      <td id=\"T_7f3ba_row0_col0\" class=\"data row0 col0\" >0.04%</td>\n      <td id=\"T_7f3ba_row0_col1\" class=\"data row0 col1\" >['-', '!!.']</td>\n    </tr>\n    <tr>\n      <th id=\"T_7f3ba_level0_row1\" class=\"row_heading level0 row1\" >Description</th>\n      <td id=\"T_7f3ba_row1_col0\" class=\"data row1 col0\" >0.11%</td>\n      <td id=\"T_7f3ba_row1_col1\" class=\"data row1 col1\" >['-', '..']</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "7ac8add78b8b4d0784cd7381f5ffc159": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "18eba5da29804a97813e65a1caabf463": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "d473258fc14b47fdb4068d71287c6f9d": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_30e264d04db44872ad1baf958ed6b463",
+        "style": "IPY_MODEL_6fa71b74c36a4dc881f83495539d5646",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "30e264d04db44872ad1baf958ed6b463": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6fa71b74c36a4dc881f83495539d5646": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "1fc9568f8a8f4a18bfbe7b7670c1f197": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "cb63aa530a6c4d7bbd2f76d834fe1bbb": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "d3adbe9c96d04d94b4b0c7ddfb6a9491": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_15f8612059614546af4d8578a2d6ddef",
+        "style": "IPY_MODEL_8f7036500ef545b9ae32bc5c60d7ab87",
+        "value": "<hr style=\"background-color: #eee;border: 0 none;color: #eee;height: 4px;\">"
+      }
+    },
+    "15f8612059614546af4d8578a2d6ddef": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "8f7036500ef545b9ae32bc5c60d7ab87": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "6c095a1d131249a6ab8efe6ad91e6eda": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_c3ac916c66224760bdcbe7917afc00e1",
+          "IPY_MODEL_6d431990747946ac8426a1df7534b819",
+          "IPY_MODEL_2b600f577b4d4ab08bf24050820151a9",
+          "IPY_MODEL_b7960efe5d4a4daeacb422ac03c9e4a8"
+        ],
+        "layout": "IPY_MODEL_bb888cbee4b0417c8b28a3b5719f1129"
+      }
+    },
+    "c3ac916c66224760bdcbe7917afc00e1": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_1a9b0a43837a4b9ab9db33225e5056a1",
+        "style": "IPY_MODEL_742770f5fd94443a9960252e095db182",
+        "value": "<h4 id=\"MixedNulls_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"><b>Mixed Nulls</b></h4>"
+      }
+    },
+    "1a9b0a43837a4b9ab9db33225e5056a1": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "742770f5fd94443a9960252e095db182": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "6d431990747946ac8426a1df7534b819": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_660a821cb1ed45b8838b1bd145f8587d",
+        "style": "IPY_MODEL_3f934604190b414ab51418aabe94b106",
+        "value": "<p>Search for various types of null values, including string representations of null.</p>"
+      }
+    },
+    "660a821cb1ed45b8838b1bd145f8587d": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "3f934604190b414ab51418aabe94b106": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "2b600f577b4d4ab08bf24050820151a9": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_0e936d5f6c1e4f9f97ffdf2eb7c3d47a",
+        "style": "IPY_MODEL_c347b0e4be0549df87de24ccb08e0bc1",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_f331b table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_f331b thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_f331b tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_f331b th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_f331b td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_f331b\">\n  <thead>\n    <tr>\n      <th id=\"T_f331b_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_f331b_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_f331b_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_f331b_row0_col0\" class=\"data row0 col0\" ><div style=\"color: red;text-align: center\">\u2716</div></td>\n      <td id=\"T_f331b_row0_col1\" class=\"data row0 col1\" >Number of different null types is less or equal to 1</td>\n      <td id=\"T_f331b_row0_col2\" class=\"data row0 col2\" >Found 2 out of 24 columns with amount of null types above threshold: ['Name', 'Description']</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "0e936d5f6c1e4f9f97ffdf2eb7c3d47a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "c347b0e4be0549df87de24ccb08e0bc1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "b7960efe5d4a4daeacb422ac03c9e4a8": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_ff73c387322745fcb0f16d84ea53b100",
+          "IPY_MODEL_4af24688887b485d8aeb33ab3801c1de",
+          "IPY_MODEL_201a461402874375a5794d698500a051",
+          "IPY_MODEL_6a3b944fc46449d9bb018c263c077e8f"
+        ],
+        "layout": "IPY_MODEL_7be0c6144ab643759767b52a34f31526"
+      }
+    },
+    "ff73c387322745fcb0f16d84ea53b100": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_4f49599f963a43298e76f7329cdae9b5",
+        "style": "IPY_MODEL_6650f8bda32743fc858d7827ca320a25",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "4f49599f963a43298e76f7329cdae9b5": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6650f8bda32743fc858d7827ca320a25": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "4af24688887b485d8aeb33ab3801c1de": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_bc01ddbe28c846f595b52acd3f28333a",
+        "style": "IPY_MODEL_eb4ba616cff84c1185bc29127648d92a",
+        "value": "<div>* showing only the top 10 columns, you can change it using n_top_columns param</div>"
+      }
+    },
+    "bc01ddbe28c846f595b52acd3f28333a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "eb4ba616cff84c1185bc29127648d92a": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "201a461402874375a5794d698500a051": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_345c02aeca26415caefad867670f1bc4",
+        "style": "IPY_MODEL_36e3e092e09b40d3b84e46ca16638043",
+        "value": "<style type=\"text/css\">\n#T_4711d table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_4711d thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_4711d tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_4711d th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_4711d td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_4711d\">\n  <thead>\n    <tr>\n      <th class=\"blank\" >&nbsp;</th>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_4711d_level0_col0\" class=\"col_heading level0 col0\" >Count</th>\n      <th id=\"T_4711d_level0_col1\" class=\"col_heading level0 col1\" >Percent of data</th>\n    </tr>\n    <tr>\n      <th class=\"index_name level0\" >Column Name</th>\n      <th class=\"index_name level1\" >Value</th>\n      <th class=\"blank col0\" >&nbsp;</th>\n      <th class=\"blank col1\" >&nbsp;</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_4711d_level0_row0\" class=\"row_heading level0 row0\" rowspan=\"4\">Name</th>\n      <th id=\"T_4711d_level1_row0\" class=\"row_heading level1 row0\" >\"None\"</th>\n      <td id=\"T_4711d_row0_col0\" class=\"data row0 col0\" >11</td>\n      <td id=\"T_4711d_row0_col1\" class=\"data row0 col1\" >0.06%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level1_row1\" class=\"row_heading level1 row1\" >\"N/a\"</th>\n      <td id=\"T_4711d_row1_col0\" class=\"data row1 col0\" >2</td>\n      <td id=\"T_4711d_row1_col1\" class=\"data row1 col1\" >0.01%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level1_row2\" class=\"row_heading level1 row2\" >\"Null\"</th>\n      <td id=\"T_4711d_row2_col0\" class=\"data row2 col0\" >1</td>\n      <td id=\"T_4711d_row2_col1\" class=\"data row2 col1\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level1_row3\" class=\"row_heading level1 row3\" >numpy.nan</th>\n      <td id=\"T_4711d_row3_col0\" class=\"data row3 col0\" >1668</td>\n      <td id=\"T_4711d_row3_col1\" class=\"data row3 col1\" >8.8%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level0_row4\" class=\"row_heading level0 row4\" rowspan=\"2\">Description</th>\n      <th id=\"T_4711d_level1_row4\" class=\"row_heading level1 row4\" >\"None\"</th>\n      <td id=\"T_4711d_row4_col0\" class=\"data row4 col0\" >1</td>\n      <td id=\"T_4711d_row4_col1\" class=\"data row4 col1\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level1_row5\" class=\"row_heading level1 row5\" >numpy.nan</th>\n      <td id=\"T_4711d_row5_col0\" class=\"data row5 col0\" >13</td>\n      <td id=\"T_4711d_row5_col1\" class=\"data row5 col1\" >0.07%</td>\n    </tr>\n    <tr>\n      <th id=\"T_4711d_level0_row6\" class=\"row_heading level0 row6\" >AdoptionSpeed</th>\n      <th id=\"T_4711d_level1_row6\" class=\"row_heading level1 row6\" >math.nan</th>\n      <td id=\"T_4711d_row6_col0\" class=\"data row6 col0\" >3972</td>\n      <td id=\"T_4711d_row6_col1\" class=\"data row6 col1\" >20.94%</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "345c02aeca26415caefad867670f1bc4": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "36e3e092e09b40d3b84e46ca16638043": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "6a3b944fc46449d9bb018c263c077e8f": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_826bb5f1098644b4ac3834814c976a87",
+        "style": "IPY_MODEL_25fa3f345c874263a2edcfd13d602854",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "826bb5f1098644b4ac3834814c976a87": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "25fa3f345c874263a2edcfd13d602854": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "7be0c6144ab643759767b52a34f31526": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "bb888cbee4b0417c8b28a3b5719f1129": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5c18071436a043dea22c47bc4b116804": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_2708244e578548a194ec5bd2a6884667",
+          "IPY_MODEL_ef0782aae62a43f18821ab205026cf45",
+          "IPY_MODEL_68fc408b069840ad8d76fdec397ef4c0",
+          "IPY_MODEL_274aff9a438d402591b0122aa294d756"
+        ],
+        "layout": "IPY_MODEL_6cd6648c32c746e983766ab684723f9b"
+      }
+    },
+    "2708244e578548a194ec5bd2a6884667": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_7a8e2ea3bf5142698bbd09ba82515700",
+        "style": "IPY_MODEL_5da5292d22d643ffb548b0b51a511c43",
+        "value": "<h4 id=\"StringMismatch_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"><b>String Mismatch</b></h4>"
+      }
+    },
+    "7a8e2ea3bf5142698bbd09ba82515700": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5da5292d22d643ffb548b0b51a511c43": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "ef0782aae62a43f18821ab205026cf45": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_10ece5275fcc4430aebd1872690f1fc5",
+        "style": "IPY_MODEL_46f7ca30d9d24a9fade1a05dab9b7b40",
+        "value": "<p>Detect different variants of string categories (e.g. \"mislabeled\" vs \"mis-labeled\") in a categorical column.</p>"
+      }
+    },
+    "10ece5275fcc4430aebd1872690f1fc5": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "46f7ca30d9d24a9fade1a05dab9b7b40": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "68fc408b069840ad8d76fdec397ef4c0": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_095a0fe9651640e59e30dbf6a6624162",
+        "style": "IPY_MODEL_bc526a01aef84fee81da17acc60a58c0",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_450ce table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_450ce thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_450ce tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_450ce th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_450ce td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_450ce\">\n  <thead>\n    <tr>\n      <th id=\"T_450ce_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_450ce_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_450ce_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_450ce_row0_col0\" class=\"data row0 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_450ce_row0_col1\" class=\"data row0 col1\" >No string variants</td>\n      <td id=\"T_450ce_row0_col2\" class=\"data row0 col2\" >Found 2 out of 4 columns with amount of variants above threshold: {'Name': ['ben', 'blacky', 'angel', 'mickey', 'golden'], 'Description': ['friendly', 'lovelypuppylookingforaforeverhomeifuareintetestedtoadoptplscontactrachel', 'foradoption', 'hiifyouwishtoadoptmepleasecallcarolthankyou', 'pleasecontactustoadoptthispetorvisitourpawssheltertocheckoutthisandotheradorablepets']}</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "095a0fe9651640e59e30dbf6a6624162": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "bc526a01aef84fee81da17acc60a58c0": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "274aff9a438d402591b0122aa294d756": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_11ba2aa4786b4bc6a39b05c44c2dfe6e",
+          "IPY_MODEL_32413872b7f74f52846a361b5dfdb0ad",
+          "IPY_MODEL_65cc5d342a4b47b9a99a709d3c339cdb",
+          "IPY_MODEL_811d0e8b20894e29b008adbddf9c7d99"
+        ],
+        "layout": "IPY_MODEL_0f3d8bcfd7244a318668eb7286942957"
+      }
+    },
+    "11ba2aa4786b4bc6a39b05c44c2dfe6e": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_f43c1e9bd7264e6ca605ac63a3e46f7b",
+        "style": "IPY_MODEL_863abd29a27b4d95911609e2ae36b29a",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "f43c1e9bd7264e6ca605ac63a3e46f7b": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "863abd29a27b4d95911609e2ae36b29a": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "32413872b7f74f52846a361b5dfdb0ad": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_a1636a2503d74ad781e980556ebb3b3e",
+        "style": "IPY_MODEL_537fddca716345ff85683b887df811b4",
+        "value": "<div>* showing only the top 10 columns, you can change it using n_top_columns param</div>"
+      }
+    },
+    "a1636a2503d74ad781e980556ebb3b3e": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "537fddca716345ff85683b887df811b4": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "65cc5d342a4b47b9a99a709d3c339cdb": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_fd8bb2262bc743a7af8ac37823727cc3",
+        "style": "IPY_MODEL_9937e65f776d4e8891cec3a65a635b67",
+        "value": "<style type=\"text/css\">\n#T_76c8f table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_76c8f thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_76c8f tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_76c8f th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_76c8f td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_76c8f\">\n  <thead>\n    <tr>\n      <th class=\"blank\" >&nbsp;</th>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_76c8f_level0_col0\" class=\"col_heading level0 col0\" >Value</th>\n      <th id=\"T_76c8f_level0_col1\" class=\"col_heading level0 col1\" >Count</th>\n      <th id=\"T_76c8f_level0_col2\" class=\"col_heading level0 col2\" >% In data</th>\n    </tr>\n    <tr>\n      <th class=\"index_name level0\" >Column Name</th>\n      <th class=\"index_name level1\" >Base form</th>\n      <th class=\"blank col0\" >&nbsp;</th>\n      <th class=\"blank col1\" >&nbsp;</th>\n      <th class=\"blank col2\" >&nbsp;</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_76c8f_level0_row0\" class=\"row_heading level0 row0\" rowspan=\"10\">Name</th>\n      <th id=\"T_76c8f_level1_row0\" class=\"row_heading level1 row0\" >ben</th>\n      <td id=\"T_76c8f_row0_col0\" class=\"data row0 col0\" >Ben</td>\n      <td id=\"T_76c8f_row0_col1\" class=\"data row0 col1\" >15</td>\n      <td id=\"T_76c8f_row0_col2\" class=\"data row0 col2\" >0.08%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row1\" class=\"row_heading level1 row1\" >buibui</th>\n      <td id=\"T_76c8f_row1_col0\" class=\"data row1 col0\" >BuiBui</td>\n      <td id=\"T_76c8f_row1_col1\" class=\"data row1 col1\" >1</td>\n      <td id=\"T_76c8f_row1_col2\" class=\"data row1 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row2\" class=\"row_heading level1 row2\" >browniegirl</th>\n      <td id=\"T_76c8f_row2_col0\" class=\"data row2 col0\" >Brownie Girl</td>\n      <td id=\"T_76c8f_row2_col1\" class=\"data row2 col1\" >1</td>\n      <td id=\"T_76c8f_row2_col2\" class=\"data row2 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row3\" class=\"row_heading level1 row3\" >browniegirl</th>\n      <td id=\"T_76c8f_row3_col0\" class=\"data row3 col0\" >BROWNIE GIRL</td>\n      <td id=\"T_76c8f_row3_col1\" class=\"data row3 col1\" >1</td>\n      <td id=\"T_76c8f_row3_col2\" class=\"data row3 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row4\" class=\"row_heading level1 row4\" >kitty16</th>\n      <td id=\"T_76c8f_row4_col0\" class=\"data row4 col0\" >Kitty 16</td>\n      <td id=\"T_76c8f_row4_col1\" class=\"data row4 col1\" >1</td>\n      <td id=\"T_76c8f_row4_col2\" class=\"data row4 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row5\" class=\"row_heading level1 row5\" >kitty16</th>\n      <td id=\"T_76c8f_row5_col0\" class=\"data row5 col0\" >Kitty 1-6</td>\n      <td id=\"T_76c8f_row5_col1\" class=\"data row5 col1\" >1</td>\n      <td id=\"T_76c8f_row5_col2\" class=\"data row5 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row6\" class=\"row_heading level1 row6\" >4straykittens</th>\n      <td id=\"T_76c8f_row6_col0\" class=\"data row6 col0\" >4 Stray Kittens</td>\n      <td id=\"T_76c8f_row6_col1\" class=\"data row6 col1\" >1</td>\n      <td id=\"T_76c8f_row6_col2\" class=\"data row6 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row7\" class=\"row_heading level1 row7\" >4straykittens</th>\n      <td id=\"T_76c8f_row7_col0\" class=\"data row7 col0\" >4 Stray Kittens_</td>\n      <td id=\"T_76c8f_row7_col1\" class=\"data row7 col1\" >1</td>\n      <td id=\"T_76c8f_row7_col2\" class=\"data row7 col2\" >0.0053%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row8\" class=\"row_heading level1 row8\" >winnie</th>\n      <td id=\"T_76c8f_row8_col0\" class=\"data row8 col0\" >Winnie</td>\n      <td id=\"T_76c8f_row8_col1\" class=\"data row8 col1\" >6</td>\n      <td id=\"T_76c8f_row8_col2\" class=\"data row8 col2\" >0.03%</td>\n    </tr>\n    <tr>\n      <th id=\"T_76c8f_level1_row9\" class=\"row_heading level1 row9\" >winnie</th>\n      <td id=\"T_76c8f_row9_col0\" class=\"data row9 col0\" >WINNIE</td>\n      <td id=\"T_76c8f_row9_col1\" class=\"data row9 col1\" >1</td>\n      <td id=\"T_76c8f_row9_col2\" class=\"data row9 col2\" >0.0053%</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "fd8bb2262bc743a7af8ac37823727cc3": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "9937e65f776d4e8891cec3a65a635b67": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "811d0e8b20894e29b008adbddf9c7d99": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_c2c6c92ec4ac453d838cfdedff68df85",
+        "style": "IPY_MODEL_1b233e6a42a641f59a6376fe541885d2",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "c2c6c92ec4ac453d838cfdedff68df85": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1b233e6a42a641f59a6376fe541885d2": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "0f3d8bcfd7244a318668eb7286942957": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6cd6648c32c746e983766ab684723f9b": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6e5ab823825a41d5a970261ed30ebdf8": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_d84ba88f3a7147e988e2030ba37ad1b8",
+          "IPY_MODEL_677c246b3cd2451e81bcd7c508efb5c3",
+          "IPY_MODEL_f7a2e443f7674e2090adaaa8288d8917",
+          "IPY_MODEL_94d6d3fc69bd4c44ba864872d79be406"
+        ],
+        "layout": "IPY_MODEL_6edb81386c904618bb8e730cd685734a"
+      }
+    },
+    "d84ba88f3a7147e988e2030ba37ad1b8": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_84de393f7a2e4025b8ba47a167af245f",
+        "style": "IPY_MODEL_78b98005f96d47ad9ab99be6445d4526",
+        "value": "<h4 id=\"StringLengthOutOfBounds_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"><b>String Length Out Of Bounds</b></h4>"
+      }
+    },
+    "84de393f7a2e4025b8ba47a167af245f": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "78b98005f96d47ad9ab99be6445d4526": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "677c246b3cd2451e81bcd7c508efb5c3": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_7cc6be88990b4370b0299985ba09f140",
+        "style": "IPY_MODEL_403a5488c1d34d749a0a30132914c746",
+        "value": "<p>Detect strings with length that is much longer/shorter than the identified \"normal\" string lengths.</p>"
+      }
+    },
+    "7cc6be88990b4370b0299985ba09f140": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "403a5488c1d34d749a0a30132914c746": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "f7a2e443f7674e2090adaaa8288d8917": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_b30abd4622534229afdc6660d1fff2e9",
+        "style": "IPY_MODEL_d3cef565704945ad898e9e48cb2a33fd",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_c4dc8 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_c4dc8 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_c4dc8 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_c4dc8 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_c4dc8 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_c4dc8\">\n  <thead>\n    <tr>\n      <th id=\"T_c4dc8_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_c4dc8_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_c4dc8_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_c4dc8_row0_col0\" class=\"data row0 col0\" ><div style=\"color: orange;text-align: center;font-weight:bold\">!</div></td>\n      <td id=\"T_c4dc8_row0_col1\" class=\"data row0 col1\" >Ratio of string length outliers is less or equal to 0%</td>\n      <td id=\"T_c4dc8_row0_col2\" class=\"data row0 col2\" >Found 1 out of 4 relevant columns with outliers ratio above threshold: {'Description': '0.35%'}</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "b30abd4622534229afdc6660d1fff2e9": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "d3cef565704945ad898e9e48cb2a33fd": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "94d6d3fc69bd4c44ba864872d79be406": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_71d086a557e84737b097f3b21a82b377",
+          "IPY_MODEL_019b0de98579495e9c7024bda95fd09b",
+          "IPY_MODEL_520343121a7a4d59b99affabd3286359",
+          "IPY_MODEL_b022b728003641208b2a7c704f000394"
+        ],
+        "layout": "IPY_MODEL_8497d088939447f19736760b81cade74"
+      }
+    },
+    "71d086a557e84737b097f3b21a82b377": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_a3009727b6bf404f8ca5fbac8b50c0a8",
+        "style": "IPY_MODEL_f00fab82d74340de84569681c3d51c1a",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "a3009727b6bf404f8ca5fbac8b50c0a8": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "f00fab82d74340de84569681c3d51c1a": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "019b0de98579495e9c7024bda95fd09b": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_4f595cb1f6694ee5b8dea15df908deae",
+        "style": "IPY_MODEL_3097ca87329c456c9e6aebc0224127af",
+        "value": "<div>* showing only the top 10 columns, you can change it using n_top_columns param</div>"
+      }
+    },
+    "4f595cb1f6694ee5b8dea15df908deae": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "3097ca87329c456c9e6aebc0224127af": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "520343121a7a4d59b99affabd3286359": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_904d441a739549049ec39d5d396f1a63",
+        "style": "IPY_MODEL_1f81c5f9052f4220b6ccfd45df0a7580",
+        "value": "<style type=\"text/css\">\n#T_89aa7 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_89aa7 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_89aa7 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_89aa7 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_89aa7 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_89aa7\">\n  <thead>\n    <tr>\n      <th class=\"blank\" >&nbsp;</th>\n      <th class=\"blank\" >&nbsp;</th>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_89aa7_level0_col0\" class=\"col_heading level0 col0\" >Number of Outlier Samples</th>\n      <th id=\"T_89aa7_level0_col1\" class=\"col_heading level0 col1\" >Example Samples</th>\n    </tr>\n    <tr>\n      <th class=\"index_name level0\" >Column Name</th>\n      <th class=\"index_name level1\" >Range of Detected Normal String Lengths</th>\n      <th class=\"index_name level2\" >Range of Detected Outlier String Lengths</th>\n      <th class=\"blank col0\" >&nbsp;</th>\n      <th class=\"blank col1\" >&nbsp;</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_89aa7_level0_row0\" class=\"row_heading level0 row0\" >Description</th>\n      <th id=\"T_89aa7_level1_row0\" class=\"row_heading level1 row0\" >1 - 1,878</th>\n      <th id=\"T_89aa7_level2_row0\" class=\"row_heading level2 row0\" >2,347.75 - 6,664</th>\n      <td id=\"T_89aa7_row0_col0\" class=\"data row0 col0\" >67</td>\n      <td id=\"T_89aa7_row0_col1\" class=\"data row0 col1\" >['puppies for adoption. Rescued by some good samarit...', 'Gabby is a beautiful sleek black puppy, estimated ...', 'This kitten which I named him Brave,was lying life...']</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "904d441a739549049ec39d5d396f1a63": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1f81c5f9052f4220b6ccfd45df0a7580": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "b022b728003641208b2a7c704f000394": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_2c69c9db47954329afcefc7a6a3e665f",
+        "style": "IPY_MODEL_36daecc6143246d78931c7fc78b20669",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "2c69c9db47954329afcefc7a6a3e665f": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "36daecc6143246d78931c7fc78b20669": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "8497d088939447f19736760b81cade74": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6edb81386c904618bb8e730cd685734a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6ee823691039478fa0a185781aa67ead": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_35811edf00b641ed9f7a2f3851d2b2d2",
+          "IPY_MODEL_8919fcf9698f40d395409263ce297462",
+          "IPY_MODEL_b34ac2912aee4575a81d28457afd0c4e",
+          "IPY_MODEL_fc51c15e554b4a6b9a998fd6b394c2a1"
+        ],
+        "layout": "IPY_MODEL_f3068c04a03d47cf902e67795a9a3298"
+      }
+    },
+    "35811edf00b641ed9f7a2f3851d2b2d2": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_23fc407fbc9e41b5933498e63fb05b2d",
+        "style": "IPY_MODEL_85ee2e14ccaa41328614a92601dc81ff",
+        "value": "<h4 id=\"ConflictingLabels_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\"><b>Conflicting Labels</b></h4>"
+      }
+    },
+    "23fc407fbc9e41b5933498e63fb05b2d": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "85ee2e14ccaa41328614a92601dc81ff": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "8919fcf9698f40d395409263ce297462": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_6209428aca0f4315bdbf443df9e7df5c",
+        "style": "IPY_MODEL_283b769a63cd4edfaed3321e389795b1",
+        "value": "<p>Find samples which have the exact same features' values but different labels.</p>"
+      }
+    },
+    "6209428aca0f4315bdbf443df9e7df5c": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "283b769a63cd4edfaed3321e389795b1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "b34ac2912aee4575a81d28457afd0c4e": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_518921dc7c344203a05d0be4a2776c4d",
+        "style": "IPY_MODEL_56b10d3318704bdf800e85609f576fd3",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_6732c table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_6732c thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_6732c tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_6732c th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_6732c td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_6732c\">\n  <thead>\n    <tr>\n      <th id=\"T_6732c_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_6732c_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_6732c_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_6732c_row0_col0\" class=\"data row0 col0\" ><div style=\"color: red;text-align: center\">\u2716</div></td>\n      <td id=\"T_6732c_row0_col1\" class=\"data row0 col1\" >Ambiguous sample ratio is less or equal to 0%</td>\n      <td id=\"T_6732c_row0_col2\" class=\"data row0 col2\" >Ratio of samples with conflicting labels: 20.94%</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "518921dc7c344203a05d0be4a2776c4d": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "56b10d3318704bdf800e85609f576fd3": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "fc51c15e554b4a6b9a998fd6b394c2a1": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_7b90652f8ad54b1a851c11a13b083287",
+          "IPY_MODEL_e263dd5e8cdb4c87acdbe28f7f04bc91",
+          "IPY_MODEL_212567fdfc274b2196d0ef1968ddcf0e",
+          "IPY_MODEL_2764d42698214853832c3f0c2d1914b7"
+        ],
+        "layout": "IPY_MODEL_fac0487cc49043689dcd47c95c7ebb76"
+      }
+    },
+    "7b90652f8ad54b1a851c11a13b083287": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_5fe62617bb0f4d5eb17760ce55ac305c",
+        "style": "IPY_MODEL_9bc4bbf87b95420ea9f6c83705afacd9",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "5fe62617bb0f4d5eb17760ce55ac305c": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "9bc4bbf87b95420ea9f6c83705afacd9": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "e263dd5e8cdb4c87acdbe28f7f04bc91": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_86759c89735a44cd8e8be1b92722e12f",
+        "style": "IPY_MODEL_0b90f8e740b24df890b6857661710e20",
+        "value": "<div>Each row in the table shows an example of a data sample and the its observed labels as found in the dataset. Showing top 5 of 5</div>"
+      }
+    },
+    "86759c89735a44cd8e8be1b92722e12f": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "0b90f8e740b24df890b6857661710e20": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "212567fdfc274b2196d0ef1968ddcf0e": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_de008339fd924a5c931730b25af79a19",
+        "style": "IPY_MODEL_2dfafd9462034ece8dcec0ff0f995e0f",
+        "value": "<style type=\"text/css\">\n#T_2cb55 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_2cb55 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_2cb55 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_2cb55 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_2cb55 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_2cb55\">\n  <thead>\n    <tr>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_2cb55_level0_col0\" class=\"col_heading level0 col0\" >Type</th>\n      <th id=\"T_2cb55_level0_col1\" class=\"col_heading level0 col1\" >Name</th>\n      <th id=\"T_2cb55_level0_col2\" class=\"col_heading level0 col2\" >Age</th>\n      <th id=\"T_2cb55_level0_col3\" class=\"col_heading level0 col3\" >Breed1</th>\n      <th id=\"T_2cb55_level0_col4\" class=\"col_heading level0 col4\" >Breed2</th>\n      <th id=\"T_2cb55_level0_col5\" class=\"col_heading level0 col5\" >Gender</th>\n      <th id=\"T_2cb55_level0_col6\" class=\"col_heading level0 col6\" >Color1</th>\n      <th id=\"T_2cb55_level0_col7\" class=\"col_heading level0 col7\" >Color2</th>\n      <th id=\"T_2cb55_level0_col8\" class=\"col_heading level0 col8\" >Color3</th>\n      <th id=\"T_2cb55_level0_col9\" class=\"col_heading level0 col9\" >MaturitySize</th>\n      <th id=\"T_2cb55_level0_col10\" class=\"col_heading level0 col10\" >FurLength</th>\n      <th id=\"T_2cb55_level0_col11\" class=\"col_heading level0 col11\" >Vaccinated</th>\n      <th id=\"T_2cb55_level0_col12\" class=\"col_heading level0 col12\" >Dewormed</th>\n      <th id=\"T_2cb55_level0_col13\" class=\"col_heading level0 col13\" >Sterilized</th>\n      <th id=\"T_2cb55_level0_col14\" class=\"col_heading level0 col14\" >Health</th>\n      <th id=\"T_2cb55_level0_col15\" class=\"col_heading level0 col15\" >Quantity</th>\n      <th id=\"T_2cb55_level0_col16\" class=\"col_heading level0 col16\" >Fee</th>\n      <th id=\"T_2cb55_level0_col17\" class=\"col_heading level0 col17\" >State</th>\n      <th id=\"T_2cb55_level0_col18\" class=\"col_heading level0 col18\" >RescuerID</th>\n      <th id=\"T_2cb55_level0_col19\" class=\"col_heading level0 col19\" >VideoAmt</th>\n      <th id=\"T_2cb55_level0_col20\" class=\"col_heading level0 col20\" >Description</th>\n      <th id=\"T_2cb55_level0_col21\" class=\"col_heading level0 col21\" >PetID</th>\n      <th id=\"T_2cb55_level0_col22\" class=\"col_heading level0 col22\" >PhotoAmt</th>\n    </tr>\n    <tr>\n      <th class=\"index_name level0\" >Observed Labels</th>\n      <th class=\"blank col0\" >&nbsp;</th>\n      <th class=\"blank col1\" >&nbsp;</th>\n      <th class=\"blank col2\" >&nbsp;</th>\n      <th class=\"blank col3\" >&nbsp;</th>\n      <th class=\"blank col4\" >&nbsp;</th>\n      <th class=\"blank col5\" >&nbsp;</th>\n      <th class=\"blank col6\" >&nbsp;</th>\n      <th class=\"blank col7\" >&nbsp;</th>\n      <th class=\"blank col8\" >&nbsp;</th>\n      <th class=\"blank col9\" >&nbsp;</th>\n      <th class=\"blank col10\" >&nbsp;</th>\n      <th class=\"blank col11\" >&nbsp;</th>\n      <th class=\"blank col12\" >&nbsp;</th>\n      <th class=\"blank col13\" >&nbsp;</th>\n      <th class=\"blank col14\" >&nbsp;</th>\n      <th class=\"blank col15\" >&nbsp;</th>\n      <th class=\"blank col16\" >&nbsp;</th>\n      <th class=\"blank col17\" >&nbsp;</th>\n      <th class=\"blank col18\" >&nbsp;</th>\n      <th class=\"blank col19\" >&nbsp;</th>\n      <th class=\"blank col20\" >&nbsp;</th>\n      <th class=\"blank col21\" >&nbsp;</th>\n      <th class=\"blank col22\" >&nbsp;</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_2cb55_level0_row0\" class=\"row_heading level0 row0\" >(nan,)</th>\n      <td id=\"T_2cb55_row0_col0\" class=\"data row0 col0\" >1</td>\n      <td id=\"T_2cb55_row0_col1\" class=\"data row0 col1\" >\"Pepper\" - A RESCUE, BREED UNKNOWN</td>\n      <td id=\"T_2cb55_row0_col2\" class=\"data row0 col2\" >12</td>\n      <td id=\"T_2cb55_row0_col3\" class=\"data row0 col3\" >18</td>\n      <td id=\"T_2cb55_row0_col4\" class=\"data row0 col4\" >189</td>\n      <td id=\"T_2cb55_row0_col5\" class=\"data row0 col5\" >2</td>\n      <td id=\"T_2cb55_row0_col6\" class=\"data row0 col6\" >1</td>\n      <td id=\"T_2cb55_row0_col7\" class=\"data row0 col7\" >2</td>\n      <td id=\"T_2cb55_row0_col8\" class=\"data row0 col8\" >7</td>\n      <td id=\"T_2cb55_row0_col9\" class=\"data row0 col9\" >2</td>\n      <td id=\"T_2cb55_row0_col10\" class=\"data row0 col10\" >2</td>\n      <td id=\"T_2cb55_row0_col11\" class=\"data row0 col11\" >3</td>\n      <td id=\"T_2cb55_row0_col12\" class=\"data row0 col12\" >1</td>\n      <td id=\"T_2cb55_row0_col13\" class=\"data row0 col13\" >3</td>\n      <td id=\"T_2cb55_row0_col14\" class=\"data row0 col14\" >1</td>\n      <td id=\"T_2cb55_row0_col15\" class=\"data row0 col15\" >1</td>\n      <td id=\"T_2cb55_row0_col16\" class=\"data row0 col16\" >0</td>\n      <td id=\"T_2cb55_row0_col17\" class=\"data row0 col17\" >41336</td>\n      <td id=\"T_2cb55_row0_col18\" class=\"data row0 col18\" >58bf14642438aeec36b1cd087aa79fad</td>\n      <td id=\"T_2cb55_row0_col19\" class=\"data row0 col19\" >0</td>\n      <td id=\"T_2cb55_row0_col20\" class=\"data row0 col20\" >'Pepper' - fostered for several months - beautiful coat - a rescue, so BREED UNKNOWN (I had to fill in the most likely breed or the ad will not post - stature and intelligence-wise like a Basenji with the fearlessness and dark features of a Rottweiler) - black with white & auburn undertones - female: 14 to 16 months old - good level of energy for a dog her age - walks well on a leash - knows basic commands: sit, paw, wait - does NOT get along very well with female dogs - GOOD WITH PEOPLE, affectionate and obedient - house-trained I'm looking for adopters for a couple of dogs I'm currently fostering. Took them in from outside my place in Bukit Indah, Johor Bahru when they were in danger of being taken away as a result of neighbour complaints. Since I already have a dog (rescued a few years back) and I live on my own and I am out a lot for work, it is difficult for me to look after them as I should. They are good dogs that deserve good homes so I hope you can help. If necessary I am willing to help any potential adopter with the costs of sterilisation and first set of vaccines, as well as assist with advice about handling them as they settle in (especially for inexperienced adopters). Contact me and I will reply to you soonest! [sitihajar//at//msn//.com] [Whatsapp:+]</td>\n      <td id=\"T_2cb55_row0_col21\" class=\"data row0 col21\" >e7252c4ee</td>\n      <td id=\"T_2cb55_row0_col22\" class=\"data row0 col22\" >3.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_2cb55_level0_row1\" class=\"row_heading level0 row1\" >(nan,)</th>\n      <td id=\"T_2cb55_row1_col0\" class=\"data row1 col0\" >1</td>\n      <td id=\"T_2cb55_row1_col1\" class=\"data row1 col1\" >*Found * An Unknown Male Shih-Tzu In Ampang</td>\n      <td id=\"T_2cb55_row1_col2\" class=\"data row1 col2\" >36</td>\n      <td id=\"T_2cb55_row1_col3\" class=\"data row1 col3\" >205</td>\n      <td id=\"T_2cb55_row1_col4\" class=\"data row1 col4\" >0</td>\n      <td id=\"T_2cb55_row1_col5\" class=\"data row1 col5\" >1</td>\n      <td id=\"T_2cb55_row1_col6\" class=\"data row1 col6\" >2</td>\n      <td id=\"T_2cb55_row1_col7\" class=\"data row1 col7\" >5</td>\n      <td id=\"T_2cb55_row1_col8\" class=\"data row1 col8\" >7</td>\n      <td id=\"T_2cb55_row1_col9\" class=\"data row1 col9\" >1</td>\n      <td id=\"T_2cb55_row1_col10\" class=\"data row1 col10\" >2</td>\n      <td id=\"T_2cb55_row1_col11\" class=\"data row1 col11\" >3</td>\n      <td id=\"T_2cb55_row1_col12\" class=\"data row1 col12\" >3</td>\n      <td id=\"T_2cb55_row1_col13\" class=\"data row1 col13\" >1</td>\n      <td id=\"T_2cb55_row1_col14\" class=\"data row1 col14\" >1</td>\n      <td id=\"T_2cb55_row1_col15\" class=\"data row1 col15\" >1</td>\n      <td id=\"T_2cb55_row1_col16\" class=\"data row1 col16\" >0</td>\n      <td id=\"T_2cb55_row1_col17\" class=\"data row1 col17\" >41401</td>\n      <td id=\"T_2cb55_row1_col18\" class=\"data row1 col18\" >4cdbaa4b538d88dca89e83ac92643205</td>\n      <td id=\"T_2cb55_row1_col19\" class=\"data row1 col19\" >0</td>\n      <td id=\"T_2cb55_row1_col20\" class=\"data row1 col20\" >We found this adorable, well-groomed, toilet trained male Shih-Tzu with white+cream coating. Found him in Ampang on Chinese New Year eve. Currently, he's in our care till we find him the respective owner very soon =)</td>\n      <td id=\"T_2cb55_row1_col21\" class=\"data row1 col21\" >b77049a0c</td>\n      <td id=\"T_2cb55_row1_col22\" class=\"data row1 col22\" >4.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_2cb55_level0_row2\" class=\"row_heading level0 row2\" >(nan,)</th>\n      <td id=\"T_2cb55_row2_col0\" class=\"data row2 col0\" >1</td>\n      <td id=\"T_2cb55_row2_col1\" class=\"data row2 col1\" >1 Female Mixed Breed Puppy</td>\n      <td id=\"T_2cb55_row2_col2\" class=\"data row2 col2\" >1</td>\n      <td id=\"T_2cb55_row2_col3\" class=\"data row2 col3\" >307</td>\n      <td id=\"T_2cb55_row2_col4\" class=\"data row2 col4\" >307</td>\n      <td id=\"T_2cb55_row2_col5\" class=\"data row2 col5\" >2</td>\n      <td id=\"T_2cb55_row2_col6\" class=\"data row2 col6\" >1</td>\n      <td id=\"T_2cb55_row2_col7\" class=\"data row2 col7\" >2</td>\n      <td id=\"T_2cb55_row2_col8\" class=\"data row2 col8\" >0</td>\n      <td id=\"T_2cb55_row2_col9\" class=\"data row2 col9\" >1</td>\n      <td id=\"T_2cb55_row2_col10\" class=\"data row2 col10\" >1</td>\n      <td id=\"T_2cb55_row2_col11\" class=\"data row2 col11\" >2</td>\n      <td id=\"T_2cb55_row2_col12\" class=\"data row2 col12\" >2</td>\n      <td id=\"T_2cb55_row2_col13\" class=\"data row2 col13\" >2</td>\n      <td id=\"T_2cb55_row2_col14\" class=\"data row2 col14\" >1</td>\n      <td id=\"T_2cb55_row2_col15\" class=\"data row2 col15\" >1</td>\n      <td id=\"T_2cb55_row2_col16\" class=\"data row2 col16\" >0</td>\n      <td id=\"T_2cb55_row2_col17\" class=\"data row2 col17\" >41401</td>\n      <td id=\"T_2cb55_row2_col18\" class=\"data row2 col18\" >f3a31778c7b6db85f44e77086f00e32d</td>\n      <td id=\"T_2cb55_row2_col19\" class=\"data row2 col19\" >0</td>\n      <td id=\"T_2cb55_row2_col20\" class=\"data row2 col20\" >My dog gave birth to 6 healthy puppies on 12 April. Only leave 1 puppy here.The pet need a home .Puppy is active & lovely.It is waiting for a forever home. Prefer someone who have a benevolent feeling towards all puppies. Please comment here or whatapps if interested, I am not available to answer the phone.</td>\n      <td id=\"T_2cb55_row2_col21\" class=\"data row2 col21\" >dd3bb8402</td>\n      <td id=\"T_2cb55_row2_col22\" class=\"data row2 col22\" >2.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_2cb55_level0_row3\" class=\"row_heading level0 row3\" >(nan,)</th>\n      <td id=\"T_2cb55_row3_col0\" class=\"data row3 col0\" >1</td>\n      <td id=\"T_2cb55_row3_col1\" class=\"data row3 col1\" >1 Puppy Awaiting Adoption</td>\n      <td id=\"T_2cb55_row3_col2\" class=\"data row3 col2\" >2</td>\n      <td id=\"T_2cb55_row3_col3\" class=\"data row3 col3\" >307</td>\n      <td id=\"T_2cb55_row3_col4\" class=\"data row3 col4\" >0</td>\n      <td id=\"T_2cb55_row3_col5\" class=\"data row3 col5\" >2</td>\n      <td id=\"T_2cb55_row3_col6\" class=\"data row3 col6\" >2</td>\n      <td id=\"T_2cb55_row3_col7\" class=\"data row3 col7\" >0</td>\n      <td id=\"T_2cb55_row3_col8\" class=\"data row3 col8\" >0</td>\n      <td id=\"T_2cb55_row3_col9\" class=\"data row3 col9\" >2</td>\n      <td id=\"T_2cb55_row3_col10\" class=\"data row3 col10\" >2</td>\n      <td id=\"T_2cb55_row3_col11\" class=\"data row3 col11\" >2</td>\n      <td id=\"T_2cb55_row3_col12\" class=\"data row3 col12\" >2</td>\n      <td id=\"T_2cb55_row3_col13\" class=\"data row3 col13\" >2</td>\n      <td id=\"T_2cb55_row3_col14\" class=\"data row3 col14\" >1</td>\n      <td id=\"T_2cb55_row3_col15\" class=\"data row3 col15\" >1</td>\n      <td id=\"T_2cb55_row3_col16\" class=\"data row3 col16\" >0</td>\n      <td id=\"T_2cb55_row3_col17\" class=\"data row3 col17\" >41336</td>\n      <td id=\"T_2cb55_row3_col18\" class=\"data row3 col18\" >3dd1089f25344908838a436c799f667a</td>\n      <td id=\"T_2cb55_row3_col19\" class=\"data row3 col19\" >0</td>\n      <td id=\"T_2cb55_row3_col20\" class=\"data row3 col20\" >This puppy rescue last week. We shall bring the puppy for neuter and vaccination before adopt by new owener.Adoption fees: 1 pack of 20KG Dog Food.Please email me if you interested adopt this puppy.</td>\n      <td id=\"T_2cb55_row3_col21\" class=\"data row3 col21\" >c10e58596</td>\n      <td id=\"T_2cb55_row3_col22\" class=\"data row3 col22\" >1.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_2cb55_level0_row4\" class=\"row_heading level0 row4\" >(nan,)</th>\n      <td id=\"T_2cb55_row4_col0\" class=\"data row4 col0\" >1</td>\n      <td id=\"T_2cb55_row4_col1\" class=\"data row4 col1\" >10 Puppies For Adoption</td>\n      <td id=\"T_2cb55_row4_col2\" class=\"data row4 col2\" >1</td>\n      <td id=\"T_2cb55_row4_col3\" class=\"data row4 col3\" >218</td>\n      <td id=\"T_2cb55_row4_col4\" class=\"data row4 col4\" >307</td>\n      <td id=\"T_2cb55_row4_col5\" class=\"data row4 col5\" >3</td>\n      <td id=\"T_2cb55_row4_col6\" class=\"data row4 col6\" >1</td>\n      <td id=\"T_2cb55_row4_col7\" class=\"data row4 col7\" >2</td>\n      <td id=\"T_2cb55_row4_col8\" class=\"data row4 col8\" >5</td>\n      <td id=\"T_2cb55_row4_col9\" class=\"data row4 col9\" >2</td>\n      <td id=\"T_2cb55_row4_col10\" class=\"data row4 col10\" >2</td>\n      <td id=\"T_2cb55_row4_col11\" class=\"data row4 col11\" >3</td>\n      <td id=\"T_2cb55_row4_col12\" class=\"data row4 col12\" >3</td>\n      <td id=\"T_2cb55_row4_col13\" class=\"data row4 col13\" >3</td>\n      <td id=\"T_2cb55_row4_col14\" class=\"data row4 col14\" >1</td>\n      <td id=\"T_2cb55_row4_col15\" class=\"data row4 col15\" >10</td>\n      <td id=\"T_2cb55_row4_col16\" class=\"data row4 col16\" >0</td>\n      <td id=\"T_2cb55_row4_col17\" class=\"data row4 col17\" >41326</td>\n      <td id=\"T_2cb55_row4_col18\" class=\"data row4 col18\" >9f853acc28c2490217f67804f2670cf9</td>\n      <td id=\"T_2cb55_row4_col19\" class=\"data row4 col19\" >0</td>\n      <td id=\"T_2cb55_row4_col20\" class=\"data row4 col20\" >puppies for adoption. please call if you're interested. i will pass the fosterers number to you. thank you</td>\n      <td id=\"T_2cb55_row4_col21\" class=\"data row4 col21\" >f413def4a</td>\n      <td id=\"T_2cb55_row4_col22\" class=\"data row4 col22\" >1.00</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "de008339fd924a5c931730b25af79a19": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "2dfafd9462034ece8dcec0ff0f995e0f": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "2764d42698214853832c3f0c2d1914b7": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_ad77a871c44d4b4592487bf6ff78fb1c",
+        "style": "IPY_MODEL_c99e60ca285c4d82b9b67f931dc4360c",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-VV87L\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "ad77a871c44d4b4592487bf6ff78fb1c": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "c99e60ca285c4d82b9b67f931dc4360c": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "fac0487cc49043689dcd47c95c7ebb76": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "f3068c04a03d47cf902e67795a9a3298": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "6e455f05b5a34620979c9f9c8f2a0883": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "eb154db471394f4fbd5c98ef194e7e6a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1ff01e9489ec465083fdfc939c585851": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "06a45f20932a4d508b7e5afc2554b09d": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_81435b10cd41486aa6b606a25aab92b5",
+          "IPY_MODEL_d64d11f6f74d46679a8594c47eb9ee7f"
+        ],
+        "layout": "IPY_MODEL_9bd66e7e37a940debd10d1cfcf64eccf"
+      }
+    },
+    "81435b10cd41486aa6b606a25aab92b5": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_172bd67294da4a239bfd5505f9abdaad",
+        "style": "IPY_MODEL_2c801e5985ba4791b7f0f2d94bd673c1",
+        "value": "<span id=\"summary_JBPM9DP35LRGVCF193EGYLEA1-section-V483W\"></span>"
+      }
+    },
+    "172bd67294da4a239bfd5505f9abdaad": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "2c801e5985ba4791b7f0f2d94bd673c1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "d64d11f6f74d46679a8594c47eb9ee7f": {
+      "model_name": "AccordionModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "_titles": {
+          "0": "Passed"
+        },
+        "children": [
+          "IPY_MODEL_a24ce6720e6e47e68d05901be309b050"
+        ],
+        "layout": "IPY_MODEL_5415503887ee47acbff91b694f06bfa3",
+        "selected_index": null
+      }
+    },
+    "a24ce6720e6e47e68d05901be309b050": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_8693e2451f2e44a7bf155b32885a4b98",
+          "IPY_MODEL_1f43a6dc15f04141b373b7a596c36c71",
+          "IPY_MODEL_8dc830678ae540dda47ab5b41fade22a"
+        ],
+        "layout": "IPY_MODEL_50a8b92bea0e4f5d9fbfd9fc416684cf"
+      }
+    },
+    "8693e2451f2e44a7bf155b32885a4b98": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_43bf99a35e034b70a4968202db60e9fc",
+        "style": "IPY_MODEL_3dafdc894b5049109e9a26aeca86bd6e",
+        "value": "<style type=\"text/css\">\n#T_23a82 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_23a82 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_23a82 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_23a82 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_23a82 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_23a82\">\n  <thead>\n    <tr>\n      <th id=\"T_23a82_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_23a82_level0_col1\" class=\"col_heading level0 col1\" >Check</th>\n      <th id=\"T_23a82_level0_col2\" class=\"col_heading level0 col2\" >Condition</th>\n      <th id=\"T_23a82_level0_col3\" class=\"col_heading level0 col3\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_23a82_row0_col0\" class=\"data row0 col0\" ><div style=\"color: green;text-align: center\">\u2713</div></td>\n      <td id=\"T_23a82_row0_col1\" class=\"data row0 col1\" ><a href=\"#FeatureLabelCorrelation_JBPM9DP35LRGVCF193EGYLEA1-section-V483W\">Feature Label Correlation</a></td>\n      <td id=\"T_23a82_row0_col2\" class=\"data row0 col2\" >Features' Predictive Power Score is less than 0.8</td>\n      <td id=\"T_23a82_row0_col3\" class=\"data row0 col3\" >Passed for 23 relevant columns</td>\n    </tr>\n    <tr>\n      <td id=\"T_23a82_row1_col0\" class=\"data row1 col0\" ><div style=\"color: green;text-align: center\">\u2713</div></td>\n      <td id=\"T_23a82_row1_col1\" class=\"data row1 col1\" >Single Value in Column</td>\n      <td id=\"T_23a82_row1_col2\" class=\"data row1 col2\" >Does not contain only a single value</td>\n      <td id=\"T_23a82_row1_col3\" class=\"data row1 col3\" >Passed for 24 relevant columns</td>\n    </tr>\n    <tr>\n      <td id=\"T_23a82_row2_col0\" class=\"data row2 col0\" ><div style=\"color: green;text-align: center\">\u2713</div></td>\n      <td id=\"T_23a82_row2_col1\" class=\"data row2 col1\" >Data Duplicates</td>\n      <td id=\"T_23a82_row2_col2\" class=\"data row2 col2\" >Duplicate data ratio is less or equal to 0%</td>\n      <td id=\"T_23a82_row2_col3\" class=\"data row2 col3\" >Found 0% duplicate data</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "43bf99a35e034b70a4968202db60e9fc": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "3dafdc894b5049109e9a26aeca86bd6e": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "1f43a6dc15f04141b373b7a596c36c71": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_c95be11596404f6297aac6e54bcb3605",
+        "style": "IPY_MODEL_936dde7c1a2a4db8beeb3e7657d436f6",
+        "value": "<hr style=\"background-color: #eee;border: 0 none;color: #eee;height: 4px;\">"
+      }
+    },
+    "c95be11596404f6297aac6e54bcb3605": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "936dde7c1a2a4db8beeb3e7657d436f6": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "8dc830678ae540dda47ab5b41fade22a": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_794ba8666ec04363a83116b045f1ca8f",
+          "IPY_MODEL_8a894024e54d4d8ba43c81766f642b03",
+          "IPY_MODEL_0ba2d7ffa74d44f99b3df1be4faccc1a",
+          "IPY_MODEL_2d1ec74467794c89963b1e11b263c151"
+        ],
+        "layout": "IPY_MODEL_4c4a83a728e54c7c99b0fdd14c778ba7"
+      }
+    },
+    "794ba8666ec04363a83116b045f1ca8f": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_c16a4a94b0774bd1a212b6325c203e0d",
+        "style": "IPY_MODEL_0b916df64e8146218ec417c33b179c97",
+        "value": "<h4 id=\"FeatureLabelCorrelation_JBPM9DP35LRGVCF193EGYLEA1-section-V483W\"><b>Feature Label Correlation</b></h4>"
+      }
+    },
+    "c16a4a94b0774bd1a212b6325c203e0d": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "0b916df64e8146218ec417c33b179c97": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "8a894024e54d4d8ba43c81766f642b03": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_d652f90cc2d744da95c4287550457b66",
+        "style": "IPY_MODEL_b9dc8ad690034e318bf9afc3077caae1",
+        "value": "<p>Return the PPS (Predictive Power Score) of all features in relation to the label.</p>"
+      }
+    },
+    "d652f90cc2d744da95c4287550457b66": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "b9dc8ad690034e318bf9afc3077caae1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "0ba2d7ffa74d44f99b3df1be4faccc1a": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_e4765cbecedd4957b34a851661c836b3",
+        "style": "IPY_MODEL_bb2247f6d778490280a8b44c96dd31a8",
+        "value": "<h5><b>Conditions Summary</b></h5><style type=\"text/css\">\n#T_ae052 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_ae052 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_ae052 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_ae052 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_ae052 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_ae052\">\n  <thead>\n    <tr>\n      <th id=\"T_ae052_level0_col0\" class=\"col_heading level0 col0\" >Status</th>\n      <th id=\"T_ae052_level0_col1\" class=\"col_heading level0 col1\" >Condition</th>\n      <th id=\"T_ae052_level0_col2\" class=\"col_heading level0 col2\" >More Info</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_ae052_row0_col0\" class=\"data row0 col0\" ><div style=\"color: green;text-align: center\">\u2713</div></td>\n      <td id=\"T_ae052_row0_col1\" class=\"data row0 col1\" >Features' Predictive Power Score is less than 0.8</td>\n      <td id=\"T_ae052_row0_col2\" class=\"data row0 col2\" >Passed for 23 relevant columns</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "e4765cbecedd4957b34a851661c836b3": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "bb2247f6d778490280a8b44c96dd31a8": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "2d1ec74467794c89963b1e11b263c151": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_38601c40fc4f4b48ac1e7e10d433c755",
+          "IPY_MODEL_262eb91386d9486bb1953a2b15fb5a58",
+          "IPY_MODEL_ea18aea8ffdd43cea666a7fdedd9edb2",
+          "IPY_MODEL_0826fce8941c41cb92cedb95170321f8"
+        ],
+        "layout": "IPY_MODEL_fdef2b1ffb3348c68f67b652d2b87176"
+      }
+    },
+    "38601c40fc4f4b48ac1e7e10d433c755": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_f5f83aadbf304750a2237d10c7c9c9d8",
+        "style": "IPY_MODEL_5233311aa16f4269bccf95fb14020d76",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "f5f83aadbf304750a2237d10c7c9c9d8": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5233311aa16f4269bccf95fb14020d76": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "262eb91386d9486bb1953a2b15fb5a58": {
+      "model_name": "FigureModel",
+      "model_module": "jupyterlab-plotly",
+      "model_module_version": "^5.5.0",
+      "state": {
+        "_config": {
+          "plotlyServerURL": "https://plot.ly"
+        },
+        "_data": [
+          {
+            "marker": {
+              "color": "#00008b"
+            },
+            "name": "Train",
+            "text": [
+              "<b>0.04</b>",
+              "<b>0.03</b>",
+              "<b>0.02</b>",
+              "<b>0.02</b>",
+              "<b>0.0</b>"
+            ],
+            "textposition": "outside",
+            "x": [
+              "Age",
+              "Sterilized",
+              "Vaccinated",
+              "Breed1",
+              "Type"
+            ],
+            "y": {
+              "dtype": "float64",
+              "shape": [
+                5
+              ]
+            },
+            "type": "bar",
+            "uid": "817b5230-6210-453a-823d-39432832dac8"
+          }
+        ],
+        "_dom_classes": [],
+        "_js2py_layoutDelta": {},
+        "_js2py_pointsCallback": {},
+        "_js2py_relayout": {},
+        "_js2py_restyle": {},
+        "_js2py_traceDeltas": {},
+        "_js2py_update": {},
+        "_layout": {
+          "barmode": "group",
+          "height": 500,
+          "legend": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "template": {
+            "data": {
+              "barpolar": [
+                {
+                  "marker": {
+                    "line": {
+                      "color": "#E5ECF6",
+                      "width": 0.5
+                    },
+                    "pattern": {
+                      "fillmode": "overlay",
+                      "size": 10,
+                      "solidity": 0.2
+                    }
+                  },
+                  "type": "barpolar"
+                }
+              ],
+              "bar": [
+                {
+                  "error_x": {
+                    "color": "#2a3f5f"
+                  },
+                  "error_y": {
+                    "color": "#2a3f5f"
+                  },
+                  "marker": {
+                    "line": {
+                      "color": "#E5ECF6",
+                      "width": 0.5
+                    },
+                    "pattern": {
+                      "fillmode": "overlay",
+                      "size": 10,
+                      "solidity": 0.2
+                    }
+                  },
+                  "type": "bar"
+                }
+              ],
+              "carpet": [
+                {
+                  "aaxis": {
+                    "endlinecolor": "#2a3f5f",
+                    "gridcolor": "white",
+                    "linecolor": "white",
+                    "minorgridcolor": "white",
+                    "startlinecolor": "#2a3f5f"
+                  },
+                  "baxis": {
+                    "endlinecolor": "#2a3f5f",
+                    "gridcolor": "white",
+                    "linecolor": "white",
+                    "minorgridcolor": "white",
+                    "startlinecolor": "#2a3f5f"
+                  },
+                  "type": "carpet"
+                }
+              ],
+              "choropleth": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "type": "choropleth"
+                }
+              ],
+              "contourcarpet": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "type": "contourcarpet"
+                }
+              ],
+              "contour": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "contour"
+                }
+              ],
+              "heatmapgl": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "heatmapgl"
+                }
+              ],
+              "heatmap": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "heatmap"
+                }
+              ],
+              "histogram2dcontour": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "histogram2dcontour"
+                }
+              ],
+              "histogram2d": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "histogram2d"
+                }
+              ],
+              "histogram": [
+                {
+                  "marker": {
+                    "pattern": {
+                      "fillmode": "overlay",
+                      "size": 10,
+                      "solidity": 0.2
+                    }
+                  },
+                  "type": "histogram"
+                }
+              ],
+              "mesh3d": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "type": "mesh3d"
+                }
+              ],
+              "parcoords": [
+                {
+                  "line": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "parcoords"
+                }
+              ],
+              "pie": [
+                {
+                  "automargin": true,
+                  "type": "pie"
+                }
+              ],
+              "scatter3d": [
+                {
+                  "line": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scatter3d"
+                }
+              ],
+              "scattercarpet": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scattercarpet"
+                }
+              ],
+              "scattergeo": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scattergeo"
+                }
+              ],
+              "scattergl": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scattergl"
+                }
+              ],
+              "scattermapbox": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scattermapbox"
+                }
+              ],
+              "scatterpolargl": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scatterpolargl"
+                }
+              ],
+              "scatterpolar": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scatterpolar"
+                }
+              ],
+              "scatter": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scatter"
+                }
+              ],
+              "scatterternary": [
+                {
+                  "marker": {
+                    "colorbar": {
+                      "outlinewidth": 0,
+                      "ticks": ""
+                    }
+                  },
+                  "type": "scatterternary"
+                }
+              ],
+              "surface": [
+                {
+                  "colorbar": {
+                    "outlinewidth": 0,
+                    "ticks": ""
+                  },
+                  "colorscale": [
+                    [
+                      0.0,
+                      "#0d0887"
+                    ],
+                    [
+                      0.1111111111111111,
+                      "#46039f"
+                    ],
+                    [
+                      0.2222222222222222,
+                      "#7201a8"
+                    ],
+                    [
+                      0.3333333333333333,
+                      "#9c179e"
+                    ],
+                    [
+                      0.4444444444444444,
+                      "#bd3786"
+                    ],
+                    [
+                      0.5555555555555556,
+                      "#d8576b"
+                    ],
+                    [
+                      0.6666666666666666,
+                      "#ed7953"
+                    ],
+                    [
+                      0.7777777777777778,
+                      "#fb9f3a"
+                    ],
+                    [
+                      0.8888888888888888,
+                      "#fdca26"
+                    ],
+                    [
+                      1.0,
+                      "#f0f921"
+                    ]
+                  ],
+                  "type": "surface"
+                }
+              ],
+              "table": [
+                {
+                  "cells": {
+                    "fill": {
+                      "color": "#EBF0F8"
+                    },
+                    "line": {
+                      "color": "white"
+                    }
+                  },
+                  "header": {
+                    "fill": {
+                      "color": "#C8D4E3"
+                    },
+                    "line": {
+                      "color": "white"
+                    }
+                  },
+                  "type": "table"
+                }
+              ]
+            },
+            "layout": {
+              "annotationdefaults": {
+                "arrowcolor": "#2a3f5f",
+                "arrowhead": 0,
+                "arrowwidth": 1
+              },
+              "autotypenumbers": "strict",
+              "coloraxis": {
+                "colorbar": {
+                  "outlinewidth": 0,
+                  "ticks": ""
+                }
+              },
+              "colorscale": {
+                "diverging": [
+                  [
+                    0,
+                    "#8e0152"
+                  ],
+                  [
+                    0.1,
+                    "#c51b7d"
+                  ],
+                  [
+                    0.2,
+                    "#de77ae"
+                  ],
+                  [
+                    0.3,
+                    "#f1b6da"
+                  ],
+                  [
+                    0.4,
+                    "#fde0ef"
+                  ],
+                  [
+                    0.5,
+                    "#f7f7f7"
+                  ],
+                  [
+                    0.6,
+                    "#e6f5d0"
+                  ],
+                  [
+                    0.7,
+                    "#b8e186"
+                  ],
+                  [
+                    0.8,
+                    "#7fbc41"
+                  ],
+                  [
+                    0.9,
+                    "#4d9221"
+                  ],
+                  [
+                    1,
+                    "#276419"
+                  ]
+                ],
+                "sequential": [
+                  [
+                    0.0,
+                    "#0d0887"
+                  ],
+                  [
+                    0.1111111111111111,
+                    "#46039f"
+                  ],
+                  [
+                    0.2222222222222222,
+                    "#7201a8"
+                  ],
+                  [
+                    0.3333333333333333,
+                    "#9c179e"
+                  ],
+                  [
+                    0.4444444444444444,
+                    "#bd3786"
+                  ],
+                  [
+                    0.5555555555555556,
+                    "#d8576b"
+                  ],
+                  [
+                    0.6666666666666666,
+                    "#ed7953"
+                  ],
+                  [
+                    0.7777777777777778,
+                    "#fb9f3a"
+                  ],
+                  [
+                    0.8888888888888888,
+                    "#fdca26"
+                  ],
+                  [
+                    1.0,
+                    "#f0f921"
+                  ]
+                ],
+                "sequentialminus": [
+                  [
+                    0.0,
+                    "#0d0887"
+                  ],
+                  [
+                    0.1111111111111111,
+                    "#46039f"
+                  ],
+                  [
+                    0.2222222222222222,
+                    "#7201a8"
+                  ],
+                  [
+                    0.3333333333333333,
+                    "#9c179e"
+                  ],
+                  [
+                    0.4444444444444444,
+                    "#bd3786"
+                  ],
+                  [
+                    0.5555555555555556,
+                    "#d8576b"
+                  ],
+                  [
+                    0.6666666666666666,
+                    "#ed7953"
+                  ],
+                  [
+                    0.7777777777777778,
+                    "#fb9f3a"
+                  ],
+                  [
+                    0.8888888888888888,
+                    "#fdca26"
+                  ],
+                  [
+                    1.0,
+                    "#f0f921"
+                  ]
+                ]
+              },
+              "colorway": [
+                "#636efa",
+                "#EF553B",
+                "#00cc96",
+                "#ab63fa",
+                "#FFA15A",
+                "#19d3f3",
+                "#FF6692",
+                "#B6E880",
+                "#FF97FF",
+                "#FECB52"
+              ],
+              "font": {
+                "color": "#2a3f5f"
+              },
+              "geo": {
+                "bgcolor": "white",
+                "lakecolor": "white",
+                "landcolor": "#E5ECF6",
+                "showlakes": true,
+                "showland": true,
+                "subunitcolor": "white"
+              },
+              "hoverlabel": {
+                "align": "left"
+              },
+              "hovermode": "closest",
+              "mapbox": {
+                "style": "light"
+              },
+              "paper_bgcolor": "white",
+              "plot_bgcolor": "#E5ECF6",
+              "polar": {
+                "angularaxis": {
+                  "gridcolor": "white",
+                  "linecolor": "white",
+                  "ticks": ""
+                },
+                "bgcolor": "#E5ECF6",
+                "radialaxis": {
+                  "gridcolor": "white",
+                  "linecolor": "white",
+                  "ticks": ""
+                }
+              },
+              "scene": {
+                "xaxis": {
+                  "backgroundcolor": "#E5ECF6",
+                  "gridcolor": "white",
+                  "gridwidth": 2,
+                  "linecolor": "white",
+                  "showbackground": true,
+                  "ticks": "",
+                  "zerolinecolor": "white"
+                },
+                "yaxis": {
+                  "backgroundcolor": "#E5ECF6",
+                  "gridcolor": "white",
+                  "gridwidth": 2,
+                  "linecolor": "white",
+                  "showbackground": true,
+                  "ticks": "",
+                  "zerolinecolor": "white"
+                },
+                "zaxis": {
+                  "backgroundcolor": "#E5ECF6",
+                  "gridcolor": "white",
+                  "gridwidth": 2,
+                  "linecolor": "white",
+                  "showbackground": true,
+                  "ticks": "",
+                  "zerolinecolor": "white"
+                }
+              },
+              "shapedefaults": {
+                "line": {
+                  "color": "#2a3f5f"
+                }
+              },
+              "ternary": {
+                "aaxis": {
+                  "gridcolor": "white",
+                  "linecolor": "white",
+                  "ticks": ""
+                },
+                "baxis": {
+                  "gridcolor": "white",
+                  "linecolor": "white",
+                  "ticks": ""
+                },
+                "bgcolor": "#E5ECF6",
+                "caxis": {
+                  "gridcolor": "white",
+                  "linecolor": "white",
+                  "ticks": ""
+                }
+              },
+              "title": {
+                "x": 0.05
+              },
+              "xaxis": {
+                "automargin": true,
+                "gridcolor": "white",
+                "linecolor": "white",
+                "ticks": "",
+                "title": {
+                  "standoff": 15
+                },
+                "zerolinecolor": "white",
+                "zerolinewidth": 2
+              },
+              "yaxis": {
+                "automargin": true,
+                "gridcolor": "white",
+                "linecolor": "white",
+                "ticks": "",
+                "title": {
+                  "standoff": 15
+                },
+                "zerolinecolor": "white",
+                "zerolinewidth": 2
+              }
+            }
+          },
+          "title": {
+            "text": "Predictive Power Score (PPS) - Can a feature predict the label by itself?"
+          },
+          "xaxis": {
+            "range": [
+              -3,
+              7
+            ],
+            "title": {
+              "text": "Column"
+            },
+            "type": "category"
+          },
+          "yaxis": {
+            "range": [
+              0,
+              1.05
+            ],
+            "title": {
+              "text": "Predictive Power Score (PPS)"
+            }
+          }
+        },
+        "_py2js_addTraces": {},
+        "_py2js_animate": {},
+        "_py2js_deleteTraces": {},
+        "_py2js_moveTraces": {},
+        "_py2js_relayout": {},
+        "_py2js_removeLayoutProps": {},
+        "_py2js_removeTraceProps": {},
+        "_py2js_restyle": {},
+        "_py2js_update": {},
+        "_view_count": 0
+      },
+      "buffers": [
+        {
+          "encoding": "base64",
+          "path": [
+            "_data",
+            0,
+            "y",
+            "buffer"
+          ],
+          "data": "oNsQNGJupD/AvINvSZOeP6AdAHaJopI/oMQDxRAlkD8ARChlXxdjPw=="
+        }
+      ]
+    },
+    "ea18aea8ffdd43cea666a7fdedd9edb2": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_74fc3fb79f27427b86886f6d8e832ce2",
+        "style": "IPY_MODEL_1312b8a60d784917b100b10912dfbb30",
+        "value": "<div>The Predictive Power Score (PPS) is used to estimate the ability of a feature to predict the label by itself (Read more about <a href=https://docs.deepchecks.com/en/stable/checks_gallery/tabular/train_test_validation/plot_feature_label_correlation_change.html target=\"_blank\">Predictive Power Score</a>). A high PPS (close to 1) can mean that this feature's success in predicting the label is actually due to data leakage - meaning that the feature holds information that is based on the label to begin with.</div>"
+      }
+    },
+    "74fc3fb79f27427b86886f6d8e832ce2": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1312b8a60d784917b100b10912dfbb30": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "0826fce8941c41cb92cedb95170321f8": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_281f733830234b13b8010f4c9f4f6b83",
+        "style": "IPY_MODEL_d7b6bc3858154cadb585eb5d91e0223b",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-V483W\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "281f733830234b13b8010f4c9f4f6b83": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "d7b6bc3858154cadb585eb5d91e0223b": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "fdef2b1ffb3348c68f67b652d2b87176": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "4c4a83a728e54c7c99b0fdd14c778ba7": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "50a8b92bea0e4f5d9fbfd9fc416684cf": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5415503887ee47acbff91b694f06bfa3": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "9bd66e7e37a940debd10d1cfcf64eccf": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "2617fa1cf0cd47e68d69d819b6977681": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_ed2b74030eb945c0814169e6a19958cd",
+          "IPY_MODEL_ab76e1e514dd444b91917ba1f851e9cb"
+        ],
+        "layout": "IPY_MODEL_1a75784c4ce647448911ecb4b6a4ee26"
+      }
+    },
+    "ed2b74030eb945c0814169e6a19958cd": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_0603e1ffb0b2446c90764198fc55a440",
+        "style": "IPY_MODEL_2cf58772f6024b61b8a38a34fa69a520",
+        "value": "<span id=\"summary_JBPM9DP35LRGVCF193EGYLEA1-section-CFTM5\"></span>"
+      }
+    },
+    "0603e1ffb0b2446c90764198fc55a440": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "2cf58772f6024b61b8a38a34fa69a520": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "ab76e1e514dd444b91917ba1f851e9cb": {
+      "model_name": "AccordionModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "_titles": {
+          "0": "Other"
+        },
+        "children": [
+          "IPY_MODEL_e18c61ec5dc04382a692d147f6009b3f"
+        ],
+        "layout": "IPY_MODEL_ff967f4ad74f4e269718493054c6d062",
+        "selected_index": null
+      }
+    },
+    "e18c61ec5dc04382a692d147f6009b3f": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_b5a7d24bab51431c9012a8dd7e6f81a5",
+          "IPY_MODEL_0013d9eac11a4e10b1700277fb86a271",
+          "IPY_MODEL_85c25be6b42b46ff82e85ec388ee07b6"
+        ],
+        "layout": "IPY_MODEL_8e58d37eb9cc42288e7c8886b7b30157"
+      }
+    },
+    "b5a7d24bab51431c9012a8dd7e6f81a5": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_ad8b5975c1cb426eb0f3a6115a5fbbc3",
+        "style": "IPY_MODEL_a8f9fa83e832498ba67325e4c394adc2",
+        "value": "<style type=\"text/css\">\n#T_71400 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_71400 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_71400 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_71400 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_71400 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_71400\">\n  <thead>\n    <tr>\n      <th id=\"T_71400_level0_col0\" class=\"col_heading level0 col0\" >Check</th>\n      <th id=\"T_71400_level0_col1\" class=\"col_heading level0 col1\" >Summary</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_71400_row0_col0\" class=\"data row0 col0\" ><a href=\"#OutlierSampleDetection_JBPM9DP35LRGVCF193EGYLEA1-section-CFTM5\">Outlier Sample Detection</a></td>\n      <td id=\"T_71400_row0_col1\" class=\"data row0 col1\" >Detects outliers in a dataset using the LoOP algorithm. <a href=\"https://docs.deepchecks.com/0.8/checks_gallery/tabular/data_integrity/plot_outlier_sample_detection.html?utm_source=display_output&utm_medium=referral&utm_campaign=check_link\" target=\"_blank\">Read More...</a></td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "ad8b5975c1cb426eb0f3a6115a5fbbc3": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "a8f9fa83e832498ba67325e4c394adc2": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "0013d9eac11a4e10b1700277fb86a271": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_b0be3ce5723b4f20b548f79b5720575f",
+        "style": "IPY_MODEL_9b33b79c276c4ac2a14eafc9129d152a",
+        "value": "<hr style=\"background-color: #eee;border: 0 none;color: #eee;height: 4px;\">"
+      }
+    },
+    "b0be3ce5723b4f20b548f79b5720575f": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "9b33b79c276c4ac2a14eafc9129d152a": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "85c25be6b42b46ff82e85ec388ee07b6": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "children": [
+          "IPY_MODEL_cccb0b33f5dc4669b1a354cc199e392a",
+          "IPY_MODEL_0aa383bc152940c6972006cb19e5f7f8",
+          "IPY_MODEL_b197eece258c41f2abb4c32a2afff964"
+        ],
+        "layout": "IPY_MODEL_b7a938cdc2e74a11a308da24799e4eef"
+      }
+    },
+    "cccb0b33f5dc4669b1a354cc199e392a": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_518c757debeb48f5878c815bf1c0edf8",
+        "style": "IPY_MODEL_0d28f5efd3ba4a28b72165612bd9b1fb",
+        "value": "<h4 id=\"OutlierSampleDetection_JBPM9DP35LRGVCF193EGYLEA1-section-CFTM5\"><b>Outlier Sample Detection</b></h4>"
+      }
+    },
+    "518c757debeb48f5878c815bf1c0edf8": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "0d28f5efd3ba4a28b72165612bd9b1fb": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "0aa383bc152940c6972006cb19e5f7f8": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_219382e1326a4143a9249c0c43554f9a",
+        "style": "IPY_MODEL_4b82d340631f416e888b6964b75d17c1",
+        "value": "<p>Detects outliers in a dataset using the LoOP algorithm.</p>"
+      }
+    },
+    "219382e1326a4143a9249c0c43554f9a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "4b82d340631f416e888b6964b75d17c1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "b197eece258c41f2abb4c32a2afff964": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_142c59433d6d4a0c8b96bc0956d40192",
+          "IPY_MODEL_1a82344ab2204a73812267b99e2bdd7c",
+          "IPY_MODEL_995fe5b34bfa4f26be6f505bbb48f96c",
+          "IPY_MODEL_593a1da1e0fc4639bd9aa1c32853cd06",
+          "IPY_MODEL_7f34c6cf836547eea30886f89c0911ca"
+        ],
+        "layout": "IPY_MODEL_765b779f7a8b4e7581f112a22e7f02e6"
+      }
+    },
+    "142c59433d6d4a0c8b96bc0956d40192": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_8ea4d1f05a12481bb0b1967fce37a37f",
+        "style": "IPY_MODEL_4ce2a63c31534f859f91d5c9ac84acde",
+        "value": "<h5><b>Additional Outputs</b></h5>"
+      }
+    },
+    "8ea4d1f05a12481bb0b1967fce37a37f": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "4ce2a63c31534f859f91d5c9ac84acde": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "1a82344ab2204a73812267b99e2bdd7c": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_378a41fcf1b94572bf36dad2c359ba78",
+        "style": "IPY_MODEL_3e4c95e1d2e34fa888129fb8585f8375",
+        "value": "<div><span>\n                    The Outlier Probability Score is calculated by the LoOP algorithm which measures the local deviation\n                    of density of a given sample with respect to its neighbors. These outlier scores are directly\n                    interpretable as a probability of an object being an outlier (see\n                    <a href=\"https://www.dbs.ifi.lmu.de/Publikationen/Papers/LoOP1649.pdf\"\n                    target=\"_blank\" rel=\"noopener noreferrer\">link</a> for more information).<br><br>\n                    </span></div>"
+      }
+    },
+    "378a41fcf1b94572bf36dad2c359ba78": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "3e4c95e1d2e34fa888129fb8585f8375": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "995fe5b34bfa4f26be6f505bbb48f96c": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_da93a891808745448e6ebef0e7b89faa",
+        "style": "IPY_MODEL_ae5b3a843382443e93432fef248b4fd1",
+        "value": "<style type=\"text/css\">\n#T_421cc table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_421cc thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_421cc tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_421cc th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_421cc td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_421cc\">\n  <thead>\n    <tr>\n      <th class=\"blank level0\" >&nbsp;</th>\n      <th id=\"T_421cc_level0_col0\" class=\"col_heading level0 col0\" >Outlier Probability Score</th>\n      <th id=\"T_421cc_level0_col1\" class=\"col_heading level0 col1\" >Type</th>\n      <th id=\"T_421cc_level0_col2\" class=\"col_heading level0 col2\" >Name</th>\n      <th id=\"T_421cc_level0_col3\" class=\"col_heading level0 col3\" >Age</th>\n      <th id=\"T_421cc_level0_col4\" class=\"col_heading level0 col4\" >Breed1</th>\n      <th id=\"T_421cc_level0_col5\" class=\"col_heading level0 col5\" >Breed2</th>\n      <th id=\"T_421cc_level0_col6\" class=\"col_heading level0 col6\" >Gender</th>\n      <th id=\"T_421cc_level0_col7\" class=\"col_heading level0 col7\" >Color1</th>\n      <th id=\"T_421cc_level0_col8\" class=\"col_heading level0 col8\" >Color2</th>\n      <th id=\"T_421cc_level0_col9\" class=\"col_heading level0 col9\" >Color3</th>\n      <th id=\"T_421cc_level0_col10\" class=\"col_heading level0 col10\" >MaturitySize</th>\n      <th id=\"T_421cc_level0_col11\" class=\"col_heading level0 col11\" >FurLength</th>\n      <th id=\"T_421cc_level0_col12\" class=\"col_heading level0 col12\" >Vaccinated</th>\n      <th id=\"T_421cc_level0_col13\" class=\"col_heading level0 col13\" >Dewormed</th>\n      <th id=\"T_421cc_level0_col14\" class=\"col_heading level0 col14\" >Sterilized</th>\n      <th id=\"T_421cc_level0_col15\" class=\"col_heading level0 col15\" >Health</th>\n      <th id=\"T_421cc_level0_col16\" class=\"col_heading level0 col16\" >Quantity</th>\n      <th id=\"T_421cc_level0_col17\" class=\"col_heading level0 col17\" >Fee</th>\n      <th id=\"T_421cc_level0_col18\" class=\"col_heading level0 col18\" >State</th>\n      <th id=\"T_421cc_level0_col19\" class=\"col_heading level0 col19\" >RescuerID</th>\n      <th id=\"T_421cc_level0_col20\" class=\"col_heading level0 col20\" >VideoAmt</th>\n      <th id=\"T_421cc_level0_col21\" class=\"col_heading level0 col21\" >Description</th>\n      <th id=\"T_421cc_level0_col22\" class=\"col_heading level0 col22\" >PetID</th>\n      <th id=\"T_421cc_level0_col23\" class=\"col_heading level0 col23\" >PhotoAmt</th>\n      <th id=\"T_421cc_level0_col24\" class=\"col_heading level0 col24\" >AdoptionSpeed</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th id=\"T_421cc_level0_row0\" class=\"row_heading level0 row0\" >14042</th>\n      <td id=\"T_421cc_row0_col0\" class=\"data row0 col0\" >0.89</td>\n      <td id=\"T_421cc_row0_col1\" class=\"data row0 col1\" >1</td>\n      <td id=\"T_421cc_row0_col2\" class=\"data row0 col2\" >Brandy</td>\n      <td id=\"T_421cc_row0_col3\" class=\"data row0 col3\" >3</td>\n      <td id=\"T_421cc_row0_col4\" class=\"data row0 col4\" >190</td>\n      <td id=\"T_421cc_row0_col5\" class=\"data row0 col5\" >0</td>\n      <td id=\"T_421cc_row0_col6\" class=\"data row0 col6\" >2</td>\n      <td id=\"T_421cc_row0_col7\" class=\"data row0 col7\" >1</td>\n      <td id=\"T_421cc_row0_col8\" class=\"data row0 col8\" >7</td>\n      <td id=\"T_421cc_row0_col9\" class=\"data row0 col9\" >0</td>\n      <td id=\"T_421cc_row0_col10\" class=\"data row0 col10\" >4</td>\n      <td id=\"T_421cc_row0_col11\" class=\"data row0 col11\" >2</td>\n      <td id=\"T_421cc_row0_col12\" class=\"data row0 col12\" >1</td>\n      <td id=\"T_421cc_row0_col13\" class=\"data row0 col13\" >2</td>\n      <td id=\"T_421cc_row0_col14\" class=\"data row0 col14\" >2</td>\n      <td id=\"T_421cc_row0_col15\" class=\"data row0 col15\" >2</td>\n      <td id=\"T_421cc_row0_col16\" class=\"data row0 col16\" >1</td>\n      <td id=\"T_421cc_row0_col17\" class=\"data row0 col17\" >0</td>\n      <td id=\"T_421cc_row0_col18\" class=\"data row0 col18\" >41324</td>\n      <td id=\"T_421cc_row0_col19\" class=\"data row0 col19\" >9e998c258ac0e00e14278682389220b6</td>\n      <td id=\"T_421cc_row0_col20\" class=\"data row0 col20\" >0</td>\n      <td id=\"T_421cc_row0_col21\" class=\"data row0 col21\" >Someone dropped off this mix Saint Bernard to us. This puppy is currently under medical treatment for skin infection. We are looking for an athletic person who have large compound as well as a secure income that would like a companion dog for daily jog. She has a guard-dog character and therefore needs to be neutered at 6 months old and needs jogging to stay disciplined. This is a large breed dog by the look of her paws. Looking for responsible owner who resides in Melaka because her next vet appointment is location in Malim and will have to go for a weekly treatment and checkup for one month. Fit owner may contact Ayi at.</td>\n      <td id=\"T_421cc_row0_col22\" class=\"data row0 col22\" >331a14422</td>\n      <td id=\"T_421cc_row0_col23\" class=\"data row0 col23\" >4.00</td>\n      <td id=\"T_421cc_row0_col24\" class=\"data row0 col24\" >1.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_421cc_level0_row1\" class=\"row_heading level0 row1\" >10576</th>\n      <td id=\"T_421cc_row1_col0\" class=\"data row1 col0\" >0.87</td>\n      <td id=\"T_421cc_row1_col1\" class=\"data row1 col1\" >1</td>\n      <td id=\"T_421cc_row1_col2\" class=\"data row1 col2\" >Boey</td>\n      <td id=\"T_421cc_row1_col3\" class=\"data row1 col3\" >3</td>\n      <td id=\"T_421cc_row1_col4\" class=\"data row1 col4\" >173</td>\n      <td id=\"T_421cc_row1_col5\" class=\"data row1 col5\" >75</td>\n      <td id=\"T_421cc_row1_col6\" class=\"data row1 col6\" >2</td>\n      <td id=\"T_421cc_row1_col7\" class=\"data row1 col7\" >7</td>\n      <td id=\"T_421cc_row1_col8\" class=\"data row1 col8\" >0</td>\n      <td id=\"T_421cc_row1_col9\" class=\"data row1 col9\" >0</td>\n      <td id=\"T_421cc_row1_col10\" class=\"data row1 col10\" >2</td>\n      <td id=\"T_421cc_row1_col11\" class=\"data row1 col11\" >1</td>\n      <td id=\"T_421cc_row1_col12\" class=\"data row1 col12\" >2</td>\n      <td id=\"T_421cc_row1_col13\" class=\"data row1 col13\" >2</td>\n      <td id=\"T_421cc_row1_col14\" class=\"data row1 col14\" >2</td>\n      <td id=\"T_421cc_row1_col15\" class=\"data row1 col15\" >1</td>\n      <td id=\"T_421cc_row1_col16\" class=\"data row1 col16\" >1</td>\n      <td id=\"T_421cc_row1_col17\" class=\"data row1 col17\" >0</td>\n      <td id=\"T_421cc_row1_col18\" class=\"data row1 col18\" >41401</td>\n      <td id=\"T_421cc_row1_col19\" class=\"data row1 col19\" >9a50c5d66f407a71f04cb6e0ef08c929</td>\n      <td id=\"T_421cc_row1_col20\" class=\"data row1 col20\" >1</td>\n      <td id=\"T_421cc_row1_col21\" class=\"data row1 col21\" >Somebody dumped this puppy in a neighbourhood where DBKL comes daily to catch stray dogs. She is very docile, gentle, friendly. Desperately need a home ASAP, before DBKL dog catchers get their hands on her. Please adopt, if not please share.</td>\n      <td id=\"T_421cc_row1_col22\" class=\"data row1 col22\" >51196cf13</td>\n      <td id=\"T_421cc_row1_col23\" class=\"data row1 col23\" >4.00</td>\n      <td id=\"T_421cc_row1_col24\" class=\"data row1 col24\" >3.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_421cc_level0_row2\" class=\"row_heading level0 row2\" >7310</th>\n      <td id=\"T_421cc_row2_col0\" class=\"data row2 col0\" >0.83</td>\n      <td id=\"T_421cc_row2_col1\" class=\"data row2 col1\" >1</td>\n      <td id=\"T_421cc_row2_col2\" class=\"data row2 col2\" >Bubu, Ayden</td>\n      <td id=\"T_421cc_row2_col3\" class=\"data row2 col3\" >4</td>\n      <td id=\"T_421cc_row2_col4\" class=\"data row2 col4\" >307</td>\n      <td id=\"T_421cc_row2_col5\" class=\"data row2 col5\" >141</td>\n      <td id=\"T_421cc_row2_col6\" class=\"data row2 col6\" >2</td>\n      <td id=\"T_421cc_row2_col7\" class=\"data row2 col7\" >2</td>\n      <td id=\"T_421cc_row2_col8\" class=\"data row2 col8\" >3</td>\n      <td id=\"T_421cc_row2_col9\" class=\"data row2 col9\" >7</td>\n      <td id=\"T_421cc_row2_col10\" class=\"data row2 col10\" >3</td>\n      <td id=\"T_421cc_row2_col11\" class=\"data row2 col11\" >1</td>\n      <td id=\"T_421cc_row2_col12\" class=\"data row2 col12\" >2</td>\n      <td id=\"T_421cc_row2_col13\" class=\"data row2 col13\" >2</td>\n      <td id=\"T_421cc_row2_col14\" class=\"data row2 col14\" >2</td>\n      <td id=\"T_421cc_row2_col15\" class=\"data row2 col15\" >1</td>\n      <td id=\"T_421cc_row2_col16\" class=\"data row2 col16\" >2</td>\n      <td id=\"T_421cc_row2_col17\" class=\"data row2 col17\" >0</td>\n      <td id=\"T_421cc_row2_col18\" class=\"data row2 col18\" >41326</td>\n      <td id=\"T_421cc_row2_col19\" class=\"data row2 col19\" >6fd702d37d38689de77b72524b0c2069</td>\n      <td id=\"T_421cc_row2_col20\" class=\"data row2 col20\" >0</td>\n      <td id=\"T_421cc_row2_col21\" class=\"data row2 col21\" >There a 2 lovable and playful but loyal and make a good guard dogs. There are beige and white puppies, all female puppies, mixture of Labrador breed.</td>\n      <td id=\"T_421cc_row2_col22\" class=\"data row2 col22\" >746fb982c</td>\n      <td id=\"T_421cc_row2_col23\" class=\"data row2 col23\" >4.00</td>\n      <td id=\"T_421cc_row2_col24\" class=\"data row2 col24\" >2.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_421cc_level0_row3\" class=\"row_heading level0 row3\" >9266</th>\n      <td id=\"T_421cc_row3_col0\" class=\"data row3 col0\" >0.83</td>\n      <td id=\"T_421cc_row3_col1\" class=\"data row3 col1\" >1</td>\n      <td id=\"T_421cc_row3_col2\" class=\"data row3 col2\" >QQ</td>\n      <td id=\"T_421cc_row3_col3\" class=\"data row3 col3\" >1</td>\n      <td id=\"T_421cc_row3_col4\" class=\"data row3 col4\" >307</td>\n      <td id=\"T_421cc_row3_col5\" class=\"data row3 col5\" >218</td>\n      <td id=\"T_421cc_row3_col6\" class=\"data row3 col6\" >2</td>\n      <td id=\"T_421cc_row3_col7\" class=\"data row3 col7\" >2</td>\n      <td id=\"T_421cc_row3_col8\" class=\"data row3 col8\" >7</td>\n      <td id=\"T_421cc_row3_col9\" class=\"data row3 col9\" >0</td>\n      <td id=\"T_421cc_row3_col10\" class=\"data row3 col10\" >2</td>\n      <td id=\"T_421cc_row3_col11\" class=\"data row3 col11\" >3</td>\n      <td id=\"T_421cc_row3_col12\" class=\"data row3 col12\" >2</td>\n      <td id=\"T_421cc_row3_col13\" class=\"data row3 col13\" >2</td>\n      <td id=\"T_421cc_row3_col14\" class=\"data row3 col14\" >2</td>\n      <td id=\"T_421cc_row3_col15\" class=\"data row3 col15\" >2</td>\n      <td id=\"T_421cc_row3_col16\" class=\"data row3 col16\" >1</td>\n      <td id=\"T_421cc_row3_col17\" class=\"data row3 col17\" >20</td>\n      <td id=\"T_421cc_row3_col18\" class=\"data row3 col18\" >41327</td>\n      <td id=\"T_421cc_row3_col19\" class=\"data row3 col19\" >7ed6d84e2e6879245e55447aee39c328</td>\n      <td id=\"T_421cc_row3_col20\" class=\"data row3 col20\" >0</td>\n      <td id=\"T_421cc_row3_col21\" class=\"data row3 col21\" >QQ is just like her name. Cute, adorable and also very friendly. She has a slight skin problem and is currently under medication. Can easily be rectified with some extra care.</td>\n      <td id=\"T_421cc_row3_col22\" class=\"data row3 col22\" >6e31c7d5c</td>\n      <td id=\"T_421cc_row3_col23\" class=\"data row3 col23\" >2.00</td>\n      <td id=\"T_421cc_row3_col24\" class=\"data row3 col24\" >2.00</td>\n    </tr>\n    <tr>\n      <th id=\"T_421cc_level0_row4\" class=\"row_heading level0 row4\" >5616</th>\n      <td id=\"T_421cc_row4_col0\" class=\"data row4 col0\" >0.82</td>\n      <td id=\"T_421cc_row4_col1\" class=\"data row4 col1\" >1</td>\n      <td id=\"T_421cc_row4_col2\" class=\"data row4 col2\" >nan</td>\n      <td id=\"T_421cc_row4_col3\" class=\"data row4 col3\" >42</td>\n      <td id=\"T_421cc_row4_col4\" class=\"data row4 col4\" >150</td>\n      <td id=\"T_421cc_row4_col5\" class=\"data row4 col5\" >150</td>\n      <td id=\"T_421cc_row4_col6\" class=\"data row4 col6\" >3</td>\n      <td id=\"T_421cc_row4_col7\" class=\"data row4 col7\" >2</td>\n      <td id=\"T_421cc_row4_col8\" class=\"data row4 col8\" >0</td>\n      <td id=\"T_421cc_row4_col9\" class=\"data row4 col9\" >0</td>\n      <td id=\"T_421cc_row4_col10\" class=\"data row4 col10\" >2</td>\n      <td id=\"T_421cc_row4_col11\" class=\"data row4 col11\" >1</td>\n      <td id=\"T_421cc_row4_col12\" class=\"data row4 col12\" >1</td>\n      <td id=\"T_421cc_row4_col13\" class=\"data row4 col13\" >1</td>\n      <td id=\"T_421cc_row4_col14\" class=\"data row4 col14\" >2</td>\n      <td id=\"T_421cc_row4_col15\" class=\"data row4 col15\" >1</td>\n      <td id=\"T_421cc_row4_col16\" class=\"data row4 col16\" >2</td>\n      <td id=\"T_421cc_row4_col17\" class=\"data row4 col17\" >0</td>\n      <td id=\"T_421cc_row4_col18\" class=\"data row4 col18\" >41326</td>\n      <td id=\"T_421cc_row4_col19\" class=\"data row4 col19\" >79a31cec094bac271630fd0d96864b8f</td>\n      <td id=\"T_421cc_row4_col20\" class=\"data row4 col20\" >0</td>\n      <td id=\"T_421cc_row4_col21\" class=\"data row4 col21\" >Lovely couples but need someone that is firm.</td>\n      <td id=\"T_421cc_row4_col22\" class=\"data row4 col22\" >3b939b40c</td>\n      <td id=\"T_421cc_row4_col23\" class=\"data row4 col23\" >0.00</td>\n      <td id=\"T_421cc_row4_col24\" class=\"data row4 col24\" >4.00</td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "da93a891808745448e6ebef0e7b89faa": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "ae5b3a843382443e93432fef248b4fd1": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "593a1da1e0fc4639bd9aa1c32853cd06": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_70a566b1051143a29a770af4b040fb7c",
+        "style": "IPY_MODEL_daf015035e6748279d7275a0d526914b",
+        "value": "<div><p style=\"font-size:0.9em;line-height:1;\"><i>Note - data sampling: Data is sampled from the original dataset, running on 5000 samples out of 18965. Sample size can be controlled with the \"n_samples\" parameter.</i></p></div>"
+      }
+    },
+    "70a566b1051143a29a770af4b040fb7c": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "daf015035e6748279d7275a0d526914b": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "7f34c6cf836547eea30886f89c0911ca": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_59aa23ae1b1e4be395796b21902401e6",
+        "style": "IPY_MODEL_b72fb7a803ea45cb9f027df275028314",
+        "value": "<br><a href=\"#summary_JBPM9DP35LRGVCF193EGYLEA1-section-CFTM5\" style=\"font-size: 14px;\">Go to top</a>"
+      }
+    },
+    "59aa23ae1b1e4be395796b21902401e6": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "b72fb7a803ea45cb9f027df275028314": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "765b779f7a8b4e7581f112a22e7f02e6": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "b7a938cdc2e74a11a308da24799e4eef": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "8e58d37eb9cc42288e7c8886b7b30157": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "ff967f4ad74f4e269718493054c6d062": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "1a75784c4ce647448911ecb4b6a4ee26": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "e25ab3d5ae4f4127999ad369be5c1132": {
+      "model_name": "VBoxModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "children": [
+          "IPY_MODEL_bbf72edcc8544c8e8b88b94f8e64b00d",
+          "IPY_MODEL_acf1b3bfbb4c4df6adbb5e47482057a7"
+        ],
+        "layout": "IPY_MODEL_5cbfb1e0cb4448ae910c9e3248e696e7"
+      }
+    },
+    "bbf72edcc8544c8e8b88b94f8e64b00d": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_16dd2acb6ed245b48fe7413c4b821d56",
+        "style": "IPY_MODEL_7a3a0e1eac51440db83ce4e30ea0ca43"
+      }
+    },
+    "16dd2acb6ed245b48fe7413c4b821d56": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "7a3a0e1eac51440db83ce4e30ea0ca43": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "acf1b3bfbb4c4df6adbb5e47482057a7": {
+      "model_name": "AccordionModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [
+          "rendered_html",
+          "jp-RenderedHTMLCommon",
+          "jp-RenderedHTML",
+          "jp-OutputArea-output"
+        ],
+        "_titles": {
+          "0": "Didn't Run"
+        },
+        "children": [
+          "IPY_MODEL_86a7339855e54e0d92cfa03f8471e9e0"
+        ],
+        "layout": "IPY_MODEL_cee15d21aa134d0696c782eeed3ab20a",
+        "selected_index": null
+      }
+    },
+    "86a7339855e54e0d92cfa03f8471e9e0": {
+      "model_name": "HTMLModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {
+        "_dom_classes": [],
+        "layout": "IPY_MODEL_4b0b6e9a39774e40aeb0aa0867f6aca3",
+        "style": "IPY_MODEL_88c8ec46823040658ab99e8eab442895",
+        "value": "<style type=\"text/css\">\n#T_90a01 table {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_90a01 thead {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_90a01 tbody {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_90a01 th {\n  text-align: left;\n  white-space: pre-wrap;\n}\n#T_90a01 td {\n  text-align: left;\n  white-space: pre-wrap;\n}\n</style>\n<table id=\"T_90a01\">\n  <thead>\n    <tr>\n      <th id=\"T_90a01_level0_col0\" class=\"col_heading level0 col0\" >Check</th>\n      <th id=\"T_90a01_level0_col1\" class=\"col_heading level0 col1\" >Reason</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td id=\"T_90a01_row0_col0\" class=\"data row0 col0\" >Mixed Data Types - Train Dataset</td>\n      <td id=\"T_90a01_row0_col1\" class=\"data row0 col1\" >cannot convert float infinity to integer</td>\n    </tr>\n    <tr>\n      <td id=\"T_90a01_row1_col0\" class=\"data row1 col0\" >Identifier Label Correlation - Train Dataset</td>\n      <td id=\"T_90a01_row1_col1\" class=\"data row1 col1\" >DatasetValidationError: Dataset does not contain an index or a datetime. see <a href=\"https://docs.deepchecks.com/0.8/user-guide/tabular/dataset_object.html?html?utm_source=display_output&utm_medium=referral&utm_campaign=check_link\" target=\"_blank\">Dataset docs</a></td>\n    </tr>\n  </tbody>\n</table>\n"
+      }
+    },
+    "4b0b6e9a39774e40aeb0aa0867f6aca3": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "88c8ec46823040658ab99e8eab442895": {
+      "model_name": "DescriptionStyleModel",
+      "model_module": "@jupyter-widgets/controls",
+      "model_module_version": "1.5.0",
+      "state": {}
+    },
+    "cee15d21aa134d0696c782eeed3ab20a": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "5cbfb1e0cb4448ae910c9e3248e696e7": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "80c5453302ea4b8cabaa6481c4bf31f9": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    },
+    "67b8f48592b54b988d10d4215bd639d2": {
+      "model_name": "LayoutModel",
+      "model_module": "@jupyter-widgets/base",
+      "model_module_version": "1.2.0",
+      "state": {}
+    }
+  }
+}
+</script>
+<script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "01e23cadd1cf44349c491dd718793cc3"}
+</script>
+
+</body>
+</html>
