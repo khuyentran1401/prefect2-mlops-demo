@@ -5,6 +5,9 @@ data:
   processed: ../data/processed/
   final: ../data/final/prediction.csv
 
+report: 
+  full_suite: ../report/full_suite.html
+
 connection:
   user: postgres
   password: 123456

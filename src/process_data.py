@@ -1,5 +1,3 @@
-from time import sleep
-
 import pandas as pd
 from omegaconf import DictConfig
 from prefect import flow, task
@@ -63,28 +61,28 @@ def encode_cat_cols(config: DictConfig, data: pd.DataFrame):
     return data
 
 
-def split_X_y(data: pd.DataFrame):
-    X = data.drop(columns=["AdoptionSpeed"])
-    y = data["AdoptionSpeed"]
-    return X, y
+@task
+def get_train_test(data: pd.DataFrame):
+    train = data.dropna(subset=["AdoptionSpeed"])
+    test = data[data["AdoptionSpeed"].isna()]
+    return {"train": train, "test": test}
 
 
-def train_validation_split(X_train: pd.DataFrame, y_train: pd.DataFrame):
-    return train_test_split(X_train, y_train, test_size=0.2, random_state=0)
+def split_X_y_train(train: pd.DataFrame):
+    X_train = train.drop(columns=["AdoptionSpeed"])
+    y_train = train["AdoptionSpeed"]
+    return X_train, y_train
 
 
 @task
-def split_data(data: pd.DataFrame):
-    train = data.dropna(subset=["AdoptionSpeed"])
-    test = data[data["AdoptionSpeed"].isna()]
-    X_train, y_train = split_X_y(train)
-    X_test, _ = split_X_y(test)
-    X_train, X_valid, y_train, y_valid = train_validation_split(
-        X_train, y_train
+def train_test_validation_split(data: dict):
+    X_train, y_train = split_X_y_train(data["train"])
+    X_train, X_valid, y_train, y_valid = train_test_split(
+        X_train, y_train, test_size=0.2, random_state=0
     )
     return {
         "X_train": X_train,
-        "X_test": X_test,
+        "X_test": data["test"],
         "X_valid": X_valid,
         "y_train": y_train,
         "y_valid": y_valid,
@@ -106,7 +104,8 @@ def process_data():
     processed = get_description_features(data)
     filtered = filter_cols(config, processed)
     encoded = encode_cat_cols(config, filtered)
-    split = split_data(encoded)
+    train_test_data = get_train_test(encoded)
+    split = train_test_validation_split(train_test_data)
     save_data(split, config)
 
 

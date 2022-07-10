@@ -1,26 +1,20 @@
-from datetime import timedelta
-from time import sleep
-
 import joblib
-import mlflow
 import pandas as pd
 from omegaconf import DictConfig
 from prefect import flow, task
-from prefect.tasks import task_input_hash
 from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
 
 from helper import load_config
 
 
-@task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
+@task
 def load_data(config: DictConfig):
     data = {}
     names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
         save_path = config.data.processed + name + ".csv"
         data[name] = pd.read_csv(save_path)
-    sleep(4)
     return data
 
 
