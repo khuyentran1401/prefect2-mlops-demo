@@ -10,13 +10,12 @@ FLOW_DIR = (Path(__file__).parent).resolve()
 sys.path.append(FLOW_DIR.as_posix())
 
 Deployment(
-    name="pet-flow-production",
-    flow=FlowScript(path=FLOW_DIR / "predict.py", name="predict"),
+    flow=FlowScript(path=FLOW_DIR / "check_data_integrity.py"),
     schedule=IntervalSchedule(
-        interval=timedelta(days=30),
+        interval=timedelta(days=1),
         anchor_date=pendulum.datetime(
-            2022, 6, 15, 11, 0, 0, tz="America/Chicago"
+            2022, 7, 11, 11, 31, 0, tz="America/Chicago"
         ),
     ),
-    tags=["prod"],
+    tags=["dev"],
 )
