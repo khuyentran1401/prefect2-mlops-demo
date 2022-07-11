@@ -9,14 +9,14 @@ from prefect.packaging import OrionPackager
 from prefect.packaging.serializers import PickleSerializer
 
 Deployment(
-    name="pet-flow-dev",
+    name="train-flow",
     flow=FlowScript(
-        path=Path(__file__).parent / "development.py", name="development"
+        path=Path(__file__).parent / "train_model.py", name="train"
     ),
     schedule=IntervalSchedule(
         interval=timedelta(days=1),
         anchor_date=pendulum.datetime(
-            2022, 7, 11, 13, 58, 0, tz="America/Chicago"
+            2022, 7, 11, 16, 5, 0, tz="America/Chicago"
         ),
     ),
     packager=OrionPackager(serializer=PickleSerializer()),

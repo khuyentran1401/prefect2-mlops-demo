@@ -1,20 +1,21 @@
 from datetime import timedelta
+from pathlib import Path
 
 import pendulum
-from prefect.deployments import DeploymentSpec
-from prefect.flow_runners import SubprocessFlowRunner
+from prefect.deployments import Deployment, FlowScript
 from prefect.orion.schemas.schedules import IntervalSchedule
+from prefect.packaging import OrionPackager
+from prefect.packaging.serializers import PickleSerializer
 
-DeploymentSpec(
+Deployment(
     name="pet-flow-production",
-    flow_location="./predict.py",
-    flow_name="predict",
+    flow=FlowScript(path=Path(__file__).parent / "predict.py", name="predict"),
     schedule=IntervalSchedule(
         interval=timedelta(days=30),
         anchor_date=pendulum.datetime(
-            2022, 6, 15, 11, 0, 0, tz="America/Chicago"
+            2022, 7, 11, 13, 56, 0, tz="America/Chicago"
         ),
     ),
-    flow_runner=SubprocessFlowRunner(),
+    packager=OrionPackager(serializer=PickleSerializer()),
     tags=["prod"],
 )
