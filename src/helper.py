@@ -1,9 +1,10 @@
-from hydra import compose, initialize
-from prefect import flow, task
-
+from prefect import task
+import yaml 
+from box import Box 
 
 @task
 def load_config():
-    with initialize(version_base=None, config_path="../config"):
-        config = compose(config_name="main")
-    return config
+    with open('../config/main.yaml') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    box_config = Box(config)
+    return box_config

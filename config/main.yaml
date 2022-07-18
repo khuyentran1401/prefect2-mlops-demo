@@ -1,9 +1,11 @@
 data:
   raw:
-    name: pet
-    path: ../data/raw/pet.csv
+    train: ../data/raw/train.csv
+    test: ../data/raw/test.csv
+    combined: ../data/raw/pet.csv
   processed: ../data/processed/
-  final: ../data/final/prediction.csv
+  final: ../data/final/
+  prediction: ../data/prediction/prediction.csv
 
 connection:
   user: postgres
