@@ -26,7 +26,7 @@ def get_prediction(data: pd.DataFrame, model: XGBClassifier):
 @task
 def save_prediction(predictions: np.ndarray, config):
     predictions = pd.Series(predictions)
-    predictions.to_csv(config.data.prediction, index=False)
+    predictions.to_csv(config.data.final, index=False)
 
 
 @flow

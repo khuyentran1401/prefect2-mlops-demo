@@ -4,8 +4,6 @@ from pathlib import Path
 import pendulum
 from prefect.deployments import Deployment, FlowScript
 from prefect.orion.schemas.schedules import IntervalSchedule
-from prefect.packaging import OrionPackager
-from prefect.packaging.serializers import PickleSerializer
 
 Deployment(
     name="pet-flow-production",
@@ -16,6 +14,5 @@ Deployment(
             2022, 7, 11, 13, 56, 0, tz="America/Chicago"
         ),
     ),
-    packager=OrionPackager(serializer=PickleSerializer()),
     tags=["prod"],
 )
