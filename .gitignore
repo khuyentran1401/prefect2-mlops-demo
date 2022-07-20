@@ -11,3 +11,4 @@ mlruns
 
 !model/.gitkeep 
 !data/*/.gitkeep
+!data/raw/*.dvc
