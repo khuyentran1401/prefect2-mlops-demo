@@ -1,8 +1,10 @@
 data:
   raw:
-    name: pet
-    path: ../data/raw/pet.csv
+    new: ../data/raw/new.csv
+    test: ../data/raw/test.csv
+    combined: ../data/raw/pet.csv
   processed: ../data/processed/
+  training: ../data/training/
   final: ../data/final/prediction.csv
 
 report: 

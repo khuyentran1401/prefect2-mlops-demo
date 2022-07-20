@@ -1,10 +1,11 @@
-hydra-core==1.2.0
 joblib==1.1.0
-mlflow==1.26.1
-numpy==1.22.4
-omegaconf==2.2.2
-pandas==1.4.2
+numpy==1.23.1
+pandas==1.4.3
+pendulum==2.1.2
 prefect==2.0b8
+PyYAML==6.0
 scikit_learn==1.1.1
-SQLAlchemy==1.4.37
+SQLAlchemy==1.4.39
 xgboost==1.6.1
+python-box==6.0.2
+dvc==2.13.0
