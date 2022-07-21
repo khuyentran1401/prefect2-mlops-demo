@@ -8,7 +8,7 @@ from xgboost import XGBClassifier
 from helper import load_config
 
 @task 
-def load_data(config):
+def load_train_test(config):
     data = {}
     names = ["X_train", "X_valid", "y_train", "y_valid"]
     for name in names:
@@ -43,7 +43,7 @@ def save_model(config: DictConfig, model: XGBClassifier):
 @flow
 def train():
     config = load_config()
-    data = load_data(config)
+    data = load_train_test(config)
     clf = train_model(config, data)
     predictions = get_prediction(data, clf)
     evaluate_model(data, predictions)

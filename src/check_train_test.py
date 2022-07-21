@@ -3,8 +3,18 @@ from deepchecks.tabular import Dataset
 from omegaconf import DictConfig
 from prefect import flow, task
 
-from helper import load_config, load_model, load_train_test
+from helper import load_config
+from deepchecks.tabular.suites import train_test_validation
 
+
+@task 
+def load_train_test(config):
+    data = {}
+    names = ["X_train", "X_valid", "y_train", "y_valid"]
+    for name in names:
+        save_path = config.data.training + name + ".csv"
+        data[name] = pd.read_csv(save_path)
+    return data
 
 def merge_X_y(X: pd.DataFrame, y: pd.DataFrame):
     return X.merge(y, left_index=True, right_index=True)
