@@ -18,6 +18,24 @@ connection:
   database: pet_finder
 
 n_estimators: 20
+check_integrity_cols:
+  - Type
+  - Age
+  - Breed1
+  - Breed2
+  - Gender
+  - Color1
+  - Color2
+  - Color3
+  - MaturitySize
+  - FurLength
+  - Vaccinated
+  - Dewormed
+  - Sterilized
+  - Health
+  - Quantity
+  - Fee
+  - AdoptionSpeed
 use_cols:
   - Type
   - Age
