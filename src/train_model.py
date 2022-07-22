@@ -7,14 +7,16 @@ from xgboost import XGBClassifier
 
 from helper import load_config
 
-@task 
+
+@task
 def load_train_test(config):
     data = {}
     names = ["X_train", "X_valid", "y_train", "y_valid"]
     for name in names:
-        save_path = config.data.training + name + ".csv"
+        save_path = config.data.processed + name + ".csv"
         data[name] = pd.read_csv(save_path)
     return data
+
 
 @task
 def train_model(config: DictConfig, data: dict):

@@ -4,11 +4,13 @@ data:
     test: ../data/raw/test.csv
     combined: ../data/raw/pet.csv
   processed: ../data/processed/
-  training: ../data/training/
+  validation: ../data/validation/
   final: ../data/final/prediction.csv
 
 report: 
   data_integrity: ../report/data_integrity.html
+  train_test_validation: ../report/train_test_validation.html
+  model_evaluation: ../report/model_evaluation.html
   full_suite: ../report/full_suite.html
 
 connection:
