@@ -1,9 +1,9 @@
 data:
   raw:
     name: pet
-    path: ../data/raw/pet.csv
-  processed: ../data/processed/
-  final: ../data/final/prediction.csv
+    path: data/raw/pet.csv
+  processed: data/processed/
+  final: data/final/prediction.csv
 
 connection:
   user: postgres
@@ -58,4 +58,4 @@ params:
   random_state: 0
 
 model:
-  save_path: ../model/xgboost
+  save_path: model/xgboost

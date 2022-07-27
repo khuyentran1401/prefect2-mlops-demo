@@ -1,0 +1,36 @@
+###
+### A complete description of a Prefect Deployment for flow 'development'
+###
+name: development
+description: null
+tags:
+- dev 
+schedule: null
+parameters: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command:
+  - python
+  - -m
+  - prefect.engine
+  stream_output: true
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: development
+manifest_path: development-manifest.json
+storage:
+  basepath: /Users/khuyen/prefect2-mlops-demo
+  _is_anonymous: true
+  _block_document_name: anonymous-5df94460-c6b4-4877-b00f-08b62dbe274e
+  _block_document_id: 07b8372b-ea66-4367-8259-b8be6d72d900
+  _block_type_slug: local-file-system
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
