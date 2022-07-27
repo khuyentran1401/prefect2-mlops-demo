@@ -20,7 +20,6 @@ def load_data(config: DictConfig):
     for name in names:
         save_path = config.data.processed + name + ".csv"
         data[name] = pd.read_csv(save_path)
-    sleep(4)
     return data
 
 
