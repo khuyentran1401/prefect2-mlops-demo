@@ -4,7 +4,7 @@ mlflow==1.26.1
 numpy==1.22.4
 omegaconf==2.2.2
 pandas==1.4.2
-prefect==2.0
+prefect==2.0.1
 scikit_learn==1.1.1
 SQLAlchemy==1.4.37
 xgboost==1.6.1
