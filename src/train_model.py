@@ -1,5 +1,4 @@
 from datetime import timedelta
-from time import sleep
 
 import joblib
 import pandas as pd
@@ -13,7 +12,7 @@ from xgboost import XGBClassifier
 from helper import load_config
 
 
-@task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
+@task(retries=3, retry_delay_seconds=5)
 def load_data(config: DictConfig):
     connection = config.connection
     engine = create_engine(
@@ -48,7 +47,6 @@ def evaluate_model(data: dict, prediction: pd.DataFrame):
 
 @task
 def save_model(config: DictConfig, model: XGBClassifier):
-    print(config.model.dir)
     joblib.dump(model, config.model.dir + config.model.save_path)
 
 
