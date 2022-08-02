@@ -1,6 +1,7 @@
 data:
-  raw:
-    name: train
+  raw: train
+  test: test
+  prediction: prediction
 
 connection:
   user: postgres

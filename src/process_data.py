@@ -18,7 +18,7 @@ def read_new_data(config: DictConfig):
     engine = create_engine(
         f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
     )
-    query = f'SELECT * FROM "{config.data.raw.name}"'
+    query = f'SELECT * FROM "{config.data.raw}"'
     df = pd.read_sql(query, con=engine)
     return df
 
