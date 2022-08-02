@@ -1,9 +1,6 @@
 data:
   raw:
-    name: pet
-    path: data/raw/pet.csv
-  processed: data/processed/
-  final: data/final/prediction.csv
+    name: train
 
 connection:
   user: postgres
@@ -47,6 +44,7 @@ cat_cols:
   - Dewormed
   - Sterilized
   - Health
+label: AdoptionSpeed
 
 n_splits: 5
 params:
@@ -58,4 +56,5 @@ params:
   random_state: 0
 
 model:
+  dir: /Users/khuyen/prefect2-mlops-demo/
   save_path: model/xgboost

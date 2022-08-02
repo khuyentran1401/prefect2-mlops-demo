@@ -1,7 +1,7 @@
 ###
-### A complete description of a Prefect Deployment for flow 'train'
+### A complete description of a Prefect Deployment for flow 'development'
 ###
-name: train
+name: development
 description: null
 tags:
 - dev
@@ -20,13 +20,13 @@ infrastructure:
 ###
 ### DO NOT EDIT BELOW THIS LINE
 ###
-flow_name: train
-manifest_path: train-manifest.json
+flow_name: development
+manifest_path: development-manifest.json
 storage:
   basepath: /Users/khuyen/prefect2-mlops-demo
   _is_anonymous: true
-  _block_document_name: anonymous-9db146ae-a878-4ff7-9d02-7b43c38bf199
-  _block_document_id: e5b4dc21-576c-4eb9-a301-a925becaaa47
+  _block_document_name: anonymous-78308c80-e17a-43dd-a1d4-894d32d73d63
+  _block_document_id: 62807754-b57d-46a9-a742-84460265026f
   _block_type_slug: local-file-system
 parameter_openapi_schema:
   title: Parameters

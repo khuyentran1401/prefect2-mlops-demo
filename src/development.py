@@ -1,14 +1,14 @@
+from get_data import get_data
 from prefect import flow
 
-from get_data import get_data
-from process_data import process_data
+from process_data import prepare_for_training
 from train_model import train
 
 
 @flow
 def development():
     get_data()
-    process_data()
+    prepare_for_training()
     train()
 
 

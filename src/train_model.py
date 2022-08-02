@@ -2,12 +2,12 @@ from datetime import timedelta
 from time import sleep
 
 import joblib
-import mlflow
 import pandas as pd
 from omegaconf import DictConfig
 from prefect import flow, task
 from prefect.tasks import task_input_hash
 from sklearn.metrics import accuracy_score
+from sqlalchemy import create_engine
 from xgboost import XGBClassifier
 
 from helper import load_config
@@ -15,11 +15,15 @@ from helper import load_config
 
 @task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
 def load_data(config: DictConfig):
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
     data = {}
     names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
-        save_path = config.data.processed + name + ".csv"
-        data[name] = pd.read_csv(save_path)
+        query = f'SELECT * FROM "{name}"'
+        data[name] = pd.read_sql(query, con=engine)
     return data
 
 
@@ -44,7 +48,8 @@ def evaluate_model(data: dict, prediction: pd.DataFrame):
 
 @task
 def save_model(config: DictConfig, model: XGBClassifier):
-    joblib.dump(model, config.model.save_path)
+    print(config.model.dir)
+    joblib.dump(model, config.model.dir + config.model.save_path)
 
 
 @flow

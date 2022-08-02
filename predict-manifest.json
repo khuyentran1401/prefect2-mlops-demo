@@ -1,0 +1,11 @@
+{
+    "flow_name": "predict",
+    "import_path": "src/predict.py:predict",
+    "parameter_openapi_schema": {
+        "title": "Parameters",
+        "type": "object",
+        "properties": {},
+        "required": null,
+        "definitions": null
+    }
+}
