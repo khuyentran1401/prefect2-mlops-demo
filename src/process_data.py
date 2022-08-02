@@ -1,7 +1,8 @@
 import pandas as pd
 from prefect import flow, task
-from helper import load_config
 from sklearn.model_selection import train_test_split
+
+from helper import load_config
 
 pd.options.mode.chained_assignment = None
 # ---------------------------------------------------------------------------- #
@@ -40,7 +41,12 @@ def get_average_word_length(data: pd.DataFrame):
 
 @task
 def filter_cols(data: pd.DataFrame, config):
-    return data[config.use_cols]
+    use_cols = list(config.use_cols)
+    try:
+        return data[use_cols]
+    except KeyError:
+        use_cols.remove(config.label)
+        return data[use_cols]
 
 
 @task
@@ -78,19 +84,24 @@ def save_data(data: dict, config):
 
 
 @flow
-def process_data():
-    config = load_config()
-    data = load_new_data(config)
-    processed = (
+def process_data(config, data):
+    return (
         data.pipe(fill_missing_description)
         .pipe(get_desc_length)
         .pipe(get_desc_words)
         .pipe(get_average_word_length)
         .pipe(filter_cols, config=config)
         .pipe(encode_cat_cols, config=config)
-        .pipe(split_data, config=config)
     )
-    save_data(processed, config)
+
+
+@flow
+def prepare_for_training():
+    config = load_config()
+    data = load_new_data(config)
+    processed = process_data(config, data)
+    X_y = split_data(processed, config=config)
+    save_data(X_y, config)
 
 
 # ---------------------------------------------------------------------------- #
@@ -99,4 +110,4 @@ def process_data():
 
 
 if __name__ == "__main__":
-    process_data()
+    prepare_for_training()

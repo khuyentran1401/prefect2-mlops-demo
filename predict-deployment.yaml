@@ -1,0 +1,36 @@
+###
+### A complete description of a Prefect Deployment for flow 'predict'
+###
+name: predict
+description: null
+tags:
+- prod
+parameters: {}
+schedule: null
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command:
+  - python
+  - -m
+  - prefect.engine
+  stream_output: true
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: predict
+manifest_path: predict-manifest.json
+storage:
+  basepath: /Users/khuyen/prefect2-mlops-demo
+  _is_anonymous: true
+  _block_document_name: anonymous-25ab6496-42eb-4235-a62c-1c79dbc95064
+  _block_document_id: 96b12157-e328-4745-a8ba-9df7818ce99e
+  _block_type_slug: local-file-system
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null

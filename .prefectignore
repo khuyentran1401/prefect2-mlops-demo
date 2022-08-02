@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Except these files
+!src
+!config
+!data/raw/new.csv 
+!data/*/.gitkeep 

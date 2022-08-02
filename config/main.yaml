@@ -1,17 +1,17 @@
 data:
   raw:
-    new: ../data/raw/new.csv
-    test: ../data/raw/test.csv
-    combined: ../data/raw/pet.csv
-  processed: ../data/processed/
-  validation: ../data/validation/
-  final: ../data/final/prediction.csv
+    new: data/raw/new.csv
+    test: data/raw/test.csv
+    combined: data/raw/pet.csv
+  processed: data/processed/
+  validation: data/validation/
+  final: data/final/
 
 report: 
-  data_integrity: ../report/data_integrity.html
-  train_test_validation: ../report/train_test_validation.html
-  model_evaluation: ../report/model_evaluation.html
-  full_suite: ../report/full_suite.html
+  data_integrity: report/data_integrity.html
+  train_test_validation: report/train_test_validation.html
+  model_evaluation: report/model_evaluation.html
+  full_suite: report/full_suite.html
 
 connection:
   user: postgres
@@ -85,4 +85,4 @@ params:
   random_state: 0
 
 model:
-  save_path: ../model/xgboost
+  save_path: model/xgboost
