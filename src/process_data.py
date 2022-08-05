@@ -1,6 +1,8 @@
 import pandas as pd
+from omegaconf import DictConfig
 from prefect import flow, task
 from sklearn.model_selection import train_test_split
+from sqlalchemy import create_engine
 
 from helper import load_config
 
@@ -10,9 +12,15 @@ pd.options.mode.chained_assignment = None
 # ---------------------------------------------------------------------------- #
 
 
-@task
-def load_new_data(config):
-    return pd.read_csv(config.data.raw.new)
+@task(retries=3, retry_delay_seconds=5)
+def read_new_data(config: DictConfig):
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
+    query = f'SELECT * FROM "{config.data.raw}"'
+    df = pd.read_sql(query, con=engine)
+    return df
 
 
 @task
@@ -40,7 +48,7 @@ def get_average_word_length(data: pd.DataFrame):
 
 
 @task
-def filter_cols(data: pd.DataFrame, config):
+def filter_cols(data: pd.DataFrame, config: DictConfig):
     use_cols = list(config.use_cols)
     try:
         return data[use_cols]
@@ -50,7 +58,7 @@ def filter_cols(data: pd.DataFrame, config):
 
 
 @task
-def encode_cat_cols(data: pd.DataFrame, config):
+def encode_cat_cols(data: pd.DataFrame, config: DictConfig):
     cat_cols = list(config.cat_cols)
     data[cat_cols] = data[cat_cols].astype(str)
     for col in cat_cols:
@@ -60,7 +68,7 @@ def encode_cat_cols(data: pd.DataFrame, config):
 
 
 @task
-def split_data(data: pd.DataFrame, config):
+def split_data(data: pd.DataFrame, config: DictConfig):
     X_train = data.drop(columns=[config.label])
     y_train = data[config.label]
     X_train, X_valid, y_train, y_valid = train_test_split(
@@ -76,11 +84,14 @@ def split_data(data: pd.DataFrame, config):
 
 
 @task
-def save_data(data: dict, config):
+def save_processed_data(data: dict, config: DictConfig):
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
 
     for name, value in data.items():
-        save_path = config.data.processed + name + ".csv"
-        value.to_csv(save_path, index=False)
+        value.to_sql(name=name, con=engine, if_exists="replace", index=False)
 
 
 @flow
@@ -98,10 +109,10 @@ def process_data(config, data):
 @flow
 def prepare_for_training():
     config = load_config()
-    data = load_new_data(config)
+    data = read_new_data(config)
     processed = process_data(config, data)
     X_y = split_data(processed, config=config)
-    save_data(X_y, config)
+    save_processed_data(X_y, config)
 
 
 # ---------------------------------------------------------------------------- #

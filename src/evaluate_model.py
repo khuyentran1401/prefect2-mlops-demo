@@ -14,9 +14,6 @@ def load_dataset(config):
         datasets[name] = joblib.load(save_path)
     return datasets
 
-    save_path = config.data.validation + "test"
-    return joblib.load(save_path)
-
 
 @task
 def load_model(config):

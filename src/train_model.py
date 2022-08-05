@@ -1,20 +1,27 @@
+from datetime import timedelta
+
 import joblib
 import pandas as pd
 from omegaconf import DictConfig
 from prefect import flow, task
 from sklearn.metrics import accuracy_score
+from sqlalchemy import create_engine
 from xgboost import XGBClassifier
 
 from helper import load_config
 
 
-@task
-def load_train_test(config):
+@task(retries=3, retry_delay_seconds=5)
+def load_train_test(config: DictConfig):
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
     data = {}
-    names = ["X_train", "X_valid", "y_train", "y_valid"]
+    names = ["X_train", "y_train", "X_valid", "y_valid"]
     for name in names:
-        save_path = config.data.processed + name + ".csv"
-        data[name] = pd.read_csv(save_path)
+        query = f'SELECT * FROM "{name}"'
+        data[name] = pd.read_sql(query, con=engine)
     return data
 
 

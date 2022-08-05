@@ -7,11 +7,7 @@ from prefect import flow, task
 from prefect.tasks import task_input_hash
 
 from helper import always_passed, is_suite_passed, load_config
-
-
-@task
-def load_new_data(config):
-    return pd.read_csv(config.data.raw.new)
+from process_data import read_new_data
 
 
 @task(cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1))
@@ -32,7 +28,7 @@ def create_data_integrity_suite(dataset: Dataset, config):
 @flow
 def check_data_integrity():
     config = load_config()
-    df = load_new_data(config)
+    df = read_new_data(config)
     dataset = init_dataset(df, config)
     result = create_data_integrity_suite(dataset, config)
     # is_suite_passed(result)

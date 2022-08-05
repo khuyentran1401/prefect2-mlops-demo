@@ -1,11 +1,9 @@
+dir: /Users/khuyen/prefect2-mlops-demo/
 data:
-  raw:
-    new: data/raw/new.csv
-    test: data/raw/test.csv
-    combined: data/raw/pet.csv
-  processed: data/processed/
-  validation: data/validation/
-  final: data/final/
+  raw: train
+  test: test
+  prediction: prediction
+  validation: ${dir}/data/validation/
 
 report: 
   data_integrity: report/data_integrity.html
@@ -85,4 +83,4 @@ params:
   random_state: 0
 
 model:
-  save_path: model/xgboost
+  save_path: ${dir}/model/xgboost

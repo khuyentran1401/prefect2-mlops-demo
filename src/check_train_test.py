@@ -5,16 +5,7 @@ from deepchecks.tabular.suites import train_test_validation
 from prefect import flow, task
 
 from helper import always_passed, is_suite_passed, load_config
-
-
-@task
-def load_train_test(config):
-    data = {}
-    names = ["X_train", "X_valid", "y_train", "y_valid"]
-    for name in names:
-        save_path = config.data.processed + name + ".csv"
-        data[name] = pd.read_csv(save_path)
-    return data
+from train_model import load_train_test
 
 
 def merge_X_y(X: pd.DataFrame, y: pd.DataFrame):

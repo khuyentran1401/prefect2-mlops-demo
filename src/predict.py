@@ -2,16 +2,21 @@ import joblib
 import numpy as np
 import pandas as pd
 from prefect import flow, task
+from sqlalchemy import create_engine
 from xgboost import XGBClassifier
 
 from helper import load_config
 from process_data import process_data
 
 
-@task
+@task(retries=3, retry_delay_seconds=5)
 def load_test(config):
-    save_path = config.data.final + "test.csv"
-    return pd.read_csv(save_path)
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
+    query = f'SELECT * FROM "{config.data.test}"'
+    return pd.read_sql(query, con=engine)
 
 
 @task
@@ -27,7 +32,18 @@ def get_prediction(data: pd.DataFrame, model: XGBClassifier):
 @task
 def save_prediction(predictions: np.ndarray, config):
     predictions = pd.Series(predictions)
-    predictions.to_csv(config.data.final + "prediction.csv", index=False)
+
+    connection = config.connection
+    engine = create_engine(
+        f"postgresql://{connection.user}:{connection.password}@{connection.host}/{connection.database}",
+    )
+
+    predictions.to_sql(
+        name=config.data.prediction,
+        con=engine,
+        if_exists="replace",
+        index=False,
+    )
 
 
 @flow
