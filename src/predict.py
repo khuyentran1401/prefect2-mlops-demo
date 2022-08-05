@@ -1,7 +1,7 @@
 import joblib
 import numpy as np
 import pandas as pd
-from prefect import flow, task
+from prefect import flow
 from sqlalchemy import create_engine
 from xgboost import XGBClassifier
 
@@ -9,7 +9,6 @@ from helper import load_config
 from process_data import process_data
 
 
-@task
 def load_test(config):
     connection = config.connection
     engine = create_engine(
@@ -19,17 +18,14 @@ def load_test(config):
     return pd.read_sql(query, con=engine)
 
 
-@task
 def load_model(config):
     return joblib.load(config.model.save_path)
 
 
-@task
 def get_prediction(data: pd.DataFrame, model: XGBClassifier):
     return model.predict(data)
 
 
-@task
 def save_prediction(predictions: np.ndarray, config):
     predictions = pd.Series(predictions)
 

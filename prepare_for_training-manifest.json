@@ -1,0 +1,11 @@
+{
+    "flow_name": "prepare-for-training",
+    "import_path": "src/process_data.py:prepare_for_training",
+    "parameter_openapi_schema": {
+        "title": "Parameters",
+        "type": "object",
+        "properties": {},
+        "required": null,
+        "definitions": null
+    }
+}

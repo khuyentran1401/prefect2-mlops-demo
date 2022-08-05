@@ -1,0 +1,37 @@
+###
+### A complete description of a Prefect Deployment for flow 'prepare-for-training'
+###
+name: process_data
+description: null
+version: 8d679edc806905bf406e65780037910b
+tags:
+- dev
+parameters: {}
+schedule: null
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command:
+  - python
+  - -m
+  - prefect.engine
+  stream_output: true
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: prepare-for-training
+manifest_path: prepare_for_training-manifest.json
+storage:
+  basepath: /Users/khuyen/prefect2-mlops-demo
+  _is_anonymous: true
+  _block_document_name: anonymous-77027b52-39a9-4ccc-afd9-661cc260b82c
+  _block_document_id: 5ec0a49d-278f-482a-af70-921a529fc0de
+  _block_type_slug: local-file-system
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
