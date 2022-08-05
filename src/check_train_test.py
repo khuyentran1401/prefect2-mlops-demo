@@ -22,6 +22,15 @@ def merge_X_y_all(data: dict):
 
 @task
 def initialize_dataset(data: dict, config):
+    """Instantiate a Dataset object
+
+    Parameters
+    ----------
+    data : dict
+        a dictionary contains the train and test sets
+    config
+        a configuration file contains the values of some variables
+    """
     cat_features = list(config.cat_cols)
     ds_train = Dataset(
         data["train"], label=config.label, cat_features=cat_features
@@ -41,6 +50,15 @@ def save_dataset(dataset: dict, config):
 
 @task
 def create_train_test_validation_suite(data: dict, config):
+    """Create a train test set validation suite
+
+    Parameters
+    ----------
+    data : dict
+        a dictionary contains the dataset objects for training and testing
+    config
+        a configuration file contains the values of some variables
+    """
     suite = train_test_validation()
     result = suite.run(data["train"], data["test"])
     result.save_as_html(config.report.train_test_validation)
