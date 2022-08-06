@@ -72,8 +72,7 @@ def check_train_test():
     train_test = merge_X_y_all(data)
     dataset = initialize_dataset(train_test, config)
     result = create_train_test_validation_suite(dataset, config)
-    # is_suite_passed(result)
-    always_passed()
+    is_suite_passed(result)
     save_dataset(dataset, config)
 
 

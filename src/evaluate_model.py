@@ -38,8 +38,7 @@ def evaluate_model():
     datasets = load_dataset(config)
     model = load_model(config)
     result = create_model_evaluation_suite(model, datasets, config)
-    # is_suite_passed(result)
-    always_passed()
+    is_suite_passed(result)
 
 
 if __name__ == "__main__":

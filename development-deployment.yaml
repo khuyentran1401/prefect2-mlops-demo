@@ -1,8 +1,9 @@
 ###
 ### A complete description of a Prefect Deployment for flow 'development'
 ###
-name: development-deployment
+name: development
 description: null
+version: c53f5268ba8fb23e6d716b670377f66f
 tags:
 - dev
 parameters: {}
@@ -25,8 +26,8 @@ manifest_path: development-manifest.json
 storage:
   basepath: /Users/khuyen/prefect2-mlops-demo
   _is_anonymous: true
-  _block_document_name: anonymous-0e9bc004-2991-4f8a-8674-c9420299f55d
-  _block_document_id: ff76cc64-a3f9-4ac8-af3a-0b615272f943
+  _block_document_name: anonymous-b87b292f-7f64-4d33-9360-065fb71be50a
+  _block_document_id: 07d8f0f0-308b-4f17-9d2e-3ef23019ff5d
   _block_type_slug: local-file-system
 parameter_openapi_schema:
   title: Parameters

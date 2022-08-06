@@ -31,8 +31,7 @@ def check_data_integrity():
     df = read_new_data(config)
     dataset = init_dataset(df, config)
     result = create_data_integrity_suite(dataset, config)
-    # is_suite_passed(result)
-    always_passed()
+    is_suite_passed(result)
 
 
 if __name__ == "__main__":
